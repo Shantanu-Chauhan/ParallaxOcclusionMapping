@@ -16,7 +16,7 @@
 #include "object.h"
 #include "texture.h"
 #include"fbo.h"
-
+#include<AntTweakBar.h>
 enum ObjectIds {
     nullId	= 0,
     skyId	= 1,
@@ -36,6 +36,7 @@ class Shader;
 class Scene
 {
 public:
+	TwBar* bar;
     // Viewing transformation parameters (suggested) FIXME: This is a
     // good place for the transformation values which are set by the
     // user mouse/keyboard actions and used in DrawScene to create the

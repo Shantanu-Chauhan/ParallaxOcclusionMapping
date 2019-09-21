@@ -19,6 +19,7 @@
 #include <glbinding/gl/gl.h>
 #include <glbinding/Binding.h>
 using namespace gl;
+#include <AntTweakBar.h>
 
 #include <freeglut.h>
 #include <glu.h>                // For gluErrorString
@@ -142,9 +143,11 @@ void animate(int value)
 // number of other parameters.
 void Scene::InitializeScene()
 {
+	bar = TwNewBar("TweakBar");
+	
     glEnable(GL_DEPTH_TEST);
     CHECKERROR;
-
+	TwAddVarRW(bar, "NameOfMyVariable", TW_TYPE_FLOAT, &spin,"");
     // FIXME: This is a good place for initializing the transformation
     // values.
 	debug = 0;
@@ -170,7 +173,7 @@ void Scene::InitializeScene()
     lightSpin = 150.0;
     lightTilt = -45.0;
     lightDist = 1000.0;
-	numberoflights = 1500;
+	numberoflights = 500;
 	srand(time(NULL));
 	float x, y, z, r, g, b;
 	int numberOfRows = 50;
@@ -373,7 +376,7 @@ void Scene::InitializeScene()
 // drawn. (Which is often: 30 to 60 times per second are the common
 // goals.)
 void Scene::DrawScene()
-{
+{	
 	const float start = glutGet((GLenum)GLUT_ELAPSED_TIME);
 	// Calculate the light's position.
 	const float lPos[4] = {
@@ -738,7 +741,9 @@ void Scene::DrawScene()
 
 	LocalLightProgram->Unuse();
 	//INFINITE LIGHTS END
-
+//glutKeyboardFunc((GLUTkeyboardfun)TwEventKeyboardGLUT);
+	// - Directly redirect GLUT special key events to AntTweakBar
+	TwDraw();
 	time_since_last_refresh = glutGet((GLenum)GLUT_ELAPSED_TIME);
 	const float end = glutGet((GLenum)GLUT_ELAPSED_TIME)-start;
 }

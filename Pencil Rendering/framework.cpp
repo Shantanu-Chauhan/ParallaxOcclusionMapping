@@ -5,7 +5,7 @@
 ////////////////////////////////////////////////////////////////////////
 
 #include "framework.h"
-
+#include<AntTweakBar.h>
 Scene scene;
 
 ////////////////////////////////////////////////////////////////////////
@@ -34,6 +34,10 @@ int main(int argc, char** argv)
     fflush(stdout);
 
     // Initialize interaction and the scene to be drawn.
+	TwInit(TW_OPENGL_CORE, NULL);
+	TwWindowSize(scene.width, scene.height);
+	
+
     InitInteraction();
     scene.InitializeScene();
 
