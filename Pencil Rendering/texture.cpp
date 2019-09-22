@@ -4,21 +4,17 @@
 // to a shader for use, and unbind when done.
 ////////////////////////////////////////////////////////////////////////
 
+#include<glew.h>
 #include "math.h"
 #include <fstream>
 #include <stdlib.h>
 
 #include "texture.h"
 
-#include <glbinding/gl/gl.h>
-#include <glbinding/Binding.h>
-using namespace gl;
-
 #define STB_IMAGE_IMPLEMENTATION
 #define STBI_FAILURE_USERMSG
 #include "stb_image.h"
 
-#include <glu.h>                // For gluErrorString
 #define CHECKERROR {GLenum err = glGetError(); if (err != GL_NO_ERROR) { fprintf(stderr, "OpenGL error (at line texture.cpp:%d): %s\n", __LINE__, gluErrorString(err)); exit(-1);} }
 
 Texture::Texture(const std::string &path) : textureId(0)
@@ -50,7 +46,7 @@ Texture::Texture(const std::string &path) : textureId(0)
 // which will provide access to the texture.
 void Texture::Bind(const int unit, const int programId, const std::string& name)
 {
-    glActiveTexture((gl::GLenum)((int)GL_TEXTURE0 + unit));
+    glActiveTexture((GLenum)((int)GL_TEXTURE0 + unit));
     glBindTexture(GL_TEXTURE_2D, textureId);
     int loc = glGetUniformLocation(programId, name.c_str());
     glUniform1i(loc, unit);

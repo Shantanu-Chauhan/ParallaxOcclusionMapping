@@ -20,16 +20,12 @@
 //    glBindVertexArray(0);
 ////////////////////////////////////////////////////////////////////////
 
+#include<glew.h>
 #include <vector>
 #include <fstream>
 #include <stdlib.h>
-
-#include <glbinding/gl/gl.h>
-#include <glbinding/Binding.h>
-using namespace gl;
-
-#include <glu.h>                // For gluErrorString
-#define CHECKERROR {GLenum err = glGetError(); if (err != GL_NO_ERROR) { fprintf(stderr, "OpenGL error (at line shapes.cpp:%d): %s\n", __LINE__, gluErrorString(err)); exit(-1);} }
+#include<glfw/glfw3.h>
+#define CHECKERROR {GLenum err = glGetError(); if (err != GL_NO_ERROR) { fprintf(stderr, "OpenGL error (at line shapes.cpp:%d): %s\n", __LINE__); exit(-1);} }
 
 #define GLM_FORCE_RADIANS
 #define GLM_SWIZZLE

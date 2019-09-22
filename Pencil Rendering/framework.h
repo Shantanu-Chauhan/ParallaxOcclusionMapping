@@ -1,11 +1,9 @@
 // All the includes neeed across several cpp files:
 //   OpenGL, FreeGLUT, GLM, etc
+#define GLEW_STATIC
 
-#include <glbinding/gl/gl.h>
-#include <glbinding/Binding.h>
-using namespace gl;
-
-#include <freeglut.h>
+#include <glew.h>
+#include <glfw/glfw3.h>
 
 #define GLM_FORCE_RADIANS
 #define GLM_SWIZZLE
@@ -15,3 +13,4 @@ using namespace glm;
 #include "shader.h"
 #include "scene.h"
 #include "interact.h"
+

@@ -5,11 +5,8 @@
 // it is "Unbound", the texture is available for use as any normal
 // texture.
 ////////////////////////////////////////////////////////////////////////
-
-#include <glbinding/gl/gl.h>
-#include <glbinding/Binding.h>
-using namespace gl;
-
+#include<stdio.h>
+#include <glew.h>
 #include "fbo.h"
 
 void FBO::CreateFBO(const int w, const int h)

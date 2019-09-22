@@ -8,14 +8,11 @@
 //
 // Methods consist of a constructor, and a Draw procedure, and an
 // append for building hierarchies of objects.
-
+#include<glew.h>
 #include "math.h"
 #include <fstream>
 #include <stdlib.h>
 
-#include <glbinding/gl/gl.h>
-#include <glbinding/Binding.h>
-using namespace gl;
 
 #define GLM_FORCE_RADIANS
 #define GLM_SWIZZLE
@@ -26,9 +23,8 @@ using namespace glm;
 #include "shapes.h"
 #include "scene.h"
 #include "transform.h"
-
-#include <glu.h>                // For gluErrorString
-#define CHECKERROR {GLenum err = glGetError(); if (err != GL_NO_ERROR) { fprintf(stderr, "OpenGL error (at line object.cpp:%d): %s\n", __LINE__, gluErrorString(err)); exit(-1);} }
+#include <glfw/glfw3.h>
+#define CHECKERROR {GLenum err = glGetError(); if (err != GL_NO_ERROR) { fprintf(stderr, "OpenGL error (at line object.cpp:%d): %s\n", __LINE__); exit(-1);} }
 
 
 Object::Object(Shape* _shape, const int _objectId,
@@ -74,7 +70,7 @@ void Object::Draw(ShaderProgram* program, MAT4& objectTr,bool dontdraw)
     // Texture::Bind for the 4 lines of code to do exactly that.
 	if (TextureId > 0)
 	{
-		glActiveTexture((gl::GLenum)((int)GL_TEXTURE0 + 5));
+		glActiveTexture((GLenum)((int)GL_TEXTURE0 + 5));
 		glBindTexture(GL_TEXTURE_2D, TextureId);
 		loc = glGetUniformLocation(program->programId, "TEXTURE");
 		glUniform1i(loc, 5);
@@ -82,7 +78,7 @@ void Object::Draw(ShaderProgram* program, MAT4& objectTr,bool dontdraw)
 
 	if (NormalId > 0)
 	{
-		glActiveTexture((gl::GLenum)((int)GL_TEXTURE0 + 6));
+		glActiveTexture((GLenum)((int)GL_TEXTURE0 + 6));
 		glBindTexture(GL_TEXTURE_2D, NormalId);
 		loc = glGetUniformLocation(program->programId, "NORMAL");
 		glUniform1i(loc, 6);

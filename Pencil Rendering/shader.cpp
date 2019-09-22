@@ -6,14 +6,9 @@
 // invoked for all geometry passing through the graphics pipeline.
 // When done, unload it with method "Unuse".
 ////////////////////////////////////////////////////////////////////////
-
+#include<glew.h>
 #include <fstream>
 
-#include <glbinding/gl/gl.h>
-#include <glbinding/Binding.h>
-using namespace gl;
-
-#include <freeglut.h>
 #include "shader.h"
 
 // Reads a specified file into a string and returns the string.  The
