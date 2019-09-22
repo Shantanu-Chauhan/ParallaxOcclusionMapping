@@ -5,13 +5,15 @@
 ////////////////////////////////////////////////////////////////////////
 
 #include "framework.h"
-
+#include <SDL.h>
 Scene scene;
 
 ////////////////////////////////////////////////////////////////////////
 // Do the OpenGL/GLut setup and then enter the interactive loop.
 int main(int argc, char** argv)
 {
+	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER);
+
     // Initialize the OpenGL bindings
     glbinding::Binding::initialize(false);
 
