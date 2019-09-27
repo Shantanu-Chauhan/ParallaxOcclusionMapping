@@ -48,7 +48,7 @@ int main(int argc, char** argv)
 		glfwPollEvents();
 	}
     // Initialize interaction and the scene to be drawn.
-    InitInteraction();
+    //InitInteraction();
     //scene.InitializeScene();
 
     // Enter the event loop.
