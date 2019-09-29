@@ -12,7 +12,7 @@
 //    glutMotionFunc: called when the mouse is moved
 
 #include "framework.h"
-
+#include <imgui.h>
 const float PI = 3.14159f;
 extern Scene scene;       // Declared in framework.cpp, but used here.
 
@@ -23,7 +23,7 @@ bool leftDown = false;
 bool middleDown = false;
 bool rightDown = false;
 
-
+ImGuiIO* io;
 ////////////////////////////////////////////////////////////////////////
 // Function called to exit
 void Quit(void* clientData)
@@ -48,10 +48,12 @@ void ReshapeWindow(int w, int h)
 //void KeyboardDown(unsigned char key, int x, int y)
 void KeyboardDown(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
+	if (io->WantCaptureKeyboard == true)
+		return;
 	int state = glfwGetKey(window, key);
 
 	fflush(stdout);
-
+	
 	if (state == GLFW_PRESS)
 	{
 		printf("key down %c(%d)\n", key, key);
@@ -114,6 +116,7 @@ void KeyboardDown(GLFWwindow* window, int key, int scancode, int action, int mod
 //void MouseButton(int button, int state, int x, int y)
 void MouseButton(GLFWwindow* window, int button, int action, int mods)
 {
+	
 	if (button == GLFW_MOUSE_BUTTON_LEFT) {
 		leftDown = (action == GLFW_PRESS);
 		printf("Left button down\n");
@@ -129,7 +132,8 @@ void MouseButton(GLFWwindow* window, int button, int action, int mods)
 		printf("Right button down\n");
 	}
 
-	
+	if (io->WantCaptureKeyboard == true)
+		return;
 
 	fflush(stdout);
 }
@@ -139,6 +143,8 @@ void MouseButton(GLFWwindow* window, int button, int action, int mods)
 //void MouseMotion(int x, int y)
 void MouseMotion(GLFWwindow* window, double x, double y)
 {
+	if (io->WantCaptureKeyboard == true)
+		return;
 	// Calculate the change in the mouse position
 	int dx = x - mouseX;
 	int dy = y - mouseY;
@@ -174,6 +180,8 @@ void MouseMotion(GLFWwindow* window, double x, double y)
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
+	if (io->WantCaptureKeyboard == true)
+		return;
 	// Test if the SHIFT key was down for this mouse click
 
 	// Figure out the mouse action, and handle accordingly
@@ -200,8 +208,9 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 }
 
 
-void InitInteraction(GLFWwindow* window)
+void InitInteraction(GLFWwindow* window, ImGuiIO* IO)
 {
+	io = IO;
 	glfwSetKeyCallback(window, KeyboardDown);
 	//glutIgnoreKeyRepeat(true);  // DO NOT change or disable this line!
 	glfwSetCursorPosCallback(window, MouseMotion);

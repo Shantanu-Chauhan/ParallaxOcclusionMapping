@@ -11,6 +11,7 @@
 //    glutMouseFunc:  called when a mouse button is pressed or released
 //    glutMotionFunc: called when the mouse is moved
 #include<glfw/glfw3.h>
-void InitInteraction(GLFWwindow* window);
+#include <imgui.h>
+void InitInteraction(GLFWwindow* window, ImGuiIO* io);
 
 

@@ -123,9 +123,9 @@ Object* FramedPicture(const MAT4& modelTr, const int objectId,
 // A callback procedure, called regularly to update the atime global
 // variable.
 float atime = 0.0;
-void animate(int value)
+void animate()
 {
-    atime = 360.0*glfwGetTime()/36000;
+    atime = 360.0*glfwGetTime()/36;
 
     // Schedule next call to this function
     //glutTimerFunc(30, animate, 1);
@@ -170,7 +170,7 @@ void Scene::InitializeScene()
 	float x, y, z, r, g, b;
 	int numberOfRows = 50;
 	int numberOfColumns = 30;
-	for (int i = 0; i < numberOfRows; i++)
+	/*for (int i = 0; i < numberOfRows; i++)
 	{
 		for (int j = 0; j < numberOfColumns; j++)
 		{
@@ -181,7 +181,7 @@ void Scene::InitializeScene()
 			lights.push_back(vec3(x, y, z));
 			lightcolor.push_back(vec3(r, g, b));
 		}
-	}
+	}*/
 
 	//for (float i = 0.0f; i < numberoflights; i++)
 	//{
@@ -329,9 +329,8 @@ void Scene::InitializeScene()
     room->add(leftFrame, Translate(-1.5, 9.85, 1.)*Scale(0.8, 0.8, 0.8));
     room->add(rightFrame, Translate( 1.5, 9.85, 1.)*Scale(0.8, 0.8, 0.8));
 
-    // Schedule first timed animation call
-    //glutTimerFunc(30, animate, 1);
-	
+
+
 	shadow.CreateFBO(2048, 2048);
 	reflection1.CreateFBO(1024,1024);
 	reflection2.CreateFBO(1024,1024);
@@ -652,45 +651,45 @@ void Scene::DrawScene()
 	glCullFace(GL_FRONT);
 	glDisable(GL_CULL_FACE);
 
-	LocalLightProgram->Use();
-	programId = LocalLightProgram->programId;
-	loc = glGetUniformLocation(programId, "WorldProj");
-	glUniformMatrix4fv(loc, 1, GL_TRUE, WorldProj.Pntr());
-	loc = glGetUniformLocation(programId, "WorldView");
-	glUniformMatrix4fv(loc, 1, GL_TRUE, WorldView.Pntr());
-	loc = glGetUniformLocation(programId, "WorldInverse");
-	glUniformMatrix4fv(loc, 1, GL_TRUE, WorldInverse.Pntr());
-	loc = glGetUniformLocation(programId, "lightPos");
-	glUniform3fv(loc, 1, &(lPos[0]));
-	loc = glGetUniformLocation(programId, "gPosition");
-	glUniform1i(loc, 7);
-	loc = glGetUniformLocation(programId, "gNormal");
-	glUniform1i(loc, 8);
-	loc = glGetUniformLocation(programId, "gAlbedoSpec");
-	glUniform1i(loc, 9);
-	loc = glGetUniformLocation(programId, "Diffuse");
-	glUniform1i(loc, 10);
-	loc = glGetUniformLocation(programId, "width");
-	glUniform1f(loc, width);
-	loc = glGetUniformLocation(programId, "height");
-	glUniform1f(loc, height);
-	const float radius = 1.0f;
-	loc = glGetUniformLocation(programId, "radius");
-	glUniform1f(loc, radius);
+	//LocalLightProgram->Use();
+	//programId = LocalLightProgram->programId;
+	//loc = glGetUniformLocation(programId, "WorldProj");
+	//glUniformMatrix4fv(loc, 1, GL_TRUE, WorldProj.Pntr());
+	//loc = glGetUniformLocation(programId, "WorldView");
+	//glUniformMatrix4fv(loc, 1, GL_TRUE, WorldView.Pntr());
+	//loc = glGetUniformLocation(programId, "WorldInverse");
+	//glUniformMatrix4fv(loc, 1, GL_TRUE, WorldInverse.Pntr());
+	//loc = glGetUniformLocation(programId, "lightPos");
+	//glUniform3fv(loc, 1, &(lPos[0]));
+	//loc = glGetUniformLocation(programId, "gPosition");
+	//glUniform1i(loc, 7);
+	//loc = glGetUniformLocation(programId, "gNormal");
+	//glUniform1i(loc, 8);
+	//loc = glGetUniformLocation(programId, "gAlbedoSpec");
+	//glUniform1i(loc, 9);
+	//loc = glGetUniformLocation(programId, "Diffuse");
+	//glUniform1i(loc, 10);
+	//loc = glGetUniformLocation(programId, "width");
+	//glUniform1f(loc, width);
+	//loc = glGetUniformLocation(programId, "height");
+	//glUniform1f(loc, height);
+	//const float radius = 1.0f;
+	//loc = glGetUniformLocation(programId, "radius");
+	//glUniform1f(loc, radius);
 
-	//int number = 1000;
-	
-	for (int i = 0;i < numberoflights; i++)
-	{
-		//vec3 LightColor(1.0, 0, 0);
-		loc = glGetUniformLocation(programId, "Light");
-		glUniform3fv(loc, 1, &(lightcolor[i][0]));
-		//draw geometry to invoke the pixel shader
-		vec3 center(lights[i].x, lights[i].y, 1);
-		loc = glGetUniformLocation(programId, "center");
-		glUniform3fv(loc, 1, &(center[0]));
-		localLights->Draw(LocalLightProgram, Translate(lights[i].x, lights[i].y, 1)*Scale(radius, radius, radius));
-	}
+	////int number = 1000;
+	//
+	//for (int i = 0;i < numberoflights; i++)
+	//{
+	//	//vec3 LightColor(1.0, 0, 0);
+	//	loc = glGetUniformLocation(programId, "Light");
+	//	glUniform3fv(loc, 1, &(lightcolor[i][0]));
+	//	//draw geometry to invoke the pixel shader
+	//	vec3 center(lights[i].x, lights[i].y, 1);
+	//	loc = glGetUniformLocation(programId, "center");
+	//	glUniform3fv(loc, 1, &(center[0]));
+	//	localLights->Draw(LocalLightProgram, Translate(lights[i].x, lights[i].y, 1)*Scale(radius, radius, radius));
+	//}
 
 	//for (float angle = 0.0; angle < 360.0; angle += 18.0)
 	//	for (float row = 0.075; row < PI / 2.0; row += PI / 2.0 / 6.0)
@@ -708,9 +707,8 @@ void Scene::DrawScene()
 	//		localLights->Draw(LocalLightProgram, Rotate(2, angle)*Translate(c, 0, s)*Scale(radius, radius, radius));
 	//	}
 
-	LocalLightProgram->Unuse();
-	//INFINITE LIGHTS END
-
+	//LocalLightProgram->Unuse();
+	animate();
 	time_since_last_refresh = glfwGetTime();
 	const float end =glfwGetTime()-start;
 }

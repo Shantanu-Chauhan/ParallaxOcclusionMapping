@@ -56,21 +56,20 @@ int main(int argc, char** argv)
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init(glsl_version);
 
-    InitInteraction(window);
+    InitInteraction(window,&io);
     scene.InitializeScene();
 	while (!glfwWindowShouldClose(window))
 	{
 		glfwPollEvents();
-
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 		ImGui::Begin("TEST");
-		ImGui::Text("This is some useful text.");
+		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		ImGui::End();
 		ImGui::Render();
 		scene.DrawScene();
-
+		
 		int display_w, display_h;
 		/*glfwGetFramebufferSize(window, &display_w, &display_h);
 		glViewport(0, 0, display_w, display_h);
