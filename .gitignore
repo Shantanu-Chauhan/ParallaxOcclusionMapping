@@ -328,3 +328,5 @@ ASALocalRun/
 
 # MFractors (Xamarin productivity tool) working folder 
 .mfractor/
+/Pencil Rendering/libs/imgui/examples
+/Pencil Rendering/libs/imgui-master (1).zip

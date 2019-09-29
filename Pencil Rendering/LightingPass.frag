@@ -16,7 +16,7 @@ const int     rPicId	= 8;
 const int     teapotId	= 9;
 const int     spheresId	= 10;
 
-//out vec4 FragColor;
+out vec4 FragColor;
 //in vec4 gl_FragCoord;
 
 uniform float width;
@@ -66,8 +66,8 @@ void main()
 	float D=((alpha+2.0)*pow(HN,alpha))/(2.0*3.14);
 
 	vec3 BRDF=(Kd/3.14)+((F*G*D)/4);
-	gl_FragColor.xyz=Ii*LN*BRDF;
-	//gl_FragColor.xyz=vec3(1.0,1.0,1.0);
+	FragColor.xyz=Ii*LN*BRDF;
+	//FragColor.xyz=vec3(1.0,1.0,1.0);
 	
 	vec4 ShadowCoord;
 	ShadowCoord=ShadowMatrix*GPosition;
@@ -81,14 +81,14 @@ void main()
 			float pixeldepth = ShadowCoord.w;
 
 			if(pixeldepth > lightdepth+0.008)//(0.008 is the offset)The pixel is in shadow
-				gl_FragColor.xyz= vec3(0,0,0);//Only ambient
+				FragColor.xyz= vec3(0,0,0);//Only ambient
 			else
-				gl_FragColor.xyz=Ii*LN*BRDF;//Else full light
+				FragColor.xyz=Ii*LN*BRDF;//Else full light
 		}
 	else
-		gl_FragColor.xyz=vec3(0,0,0);//Outside only ambient
+		FragColor.xyz=vec3(0,0,0);//Outside only ambient
 	}
 	else
-	gl_FragColor.xyz=vec3(0,0,0);//Outside Only ambient
+	FragColor.xyz=vec3(0,0,0);//Outside Only ambient
 
 }  

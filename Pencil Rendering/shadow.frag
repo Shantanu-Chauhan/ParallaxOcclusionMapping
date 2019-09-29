@@ -15,9 +15,10 @@ const int     teapotId	= 9;
 const int     spheresId	= 10;
 uniform int objectId;
 
+out vec4 FragColor;
 in vec4 position;
 
 void main()
 {
-	gl_FragData[0] =vec4(position.x,position.y,position.z,position.w);
+	FragColor =vec4(position.x,position.y,position.z,position.w);
 }

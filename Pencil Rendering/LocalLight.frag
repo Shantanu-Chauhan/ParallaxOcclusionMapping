@@ -16,6 +16,8 @@ const int     rPicId	= 8;
 const int     teapotId	= 9;
 const int     spheresId	= 10;
 
+out vec4 FragColor;
+
 uniform vec3 lightPos;
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;
@@ -63,9 +65,9 @@ void main()
 		float D=((alpha+2.0)*pow(HN,alpha))/(2.0*3.14);
 
 		vec3 BRDF=(Kd/3.14)+((F*G*D)/4);
-		gl_FragColor.xyz=Ii*LN*BRDF;
+		FragColor.xyz=Ii*LN*BRDF;
 	}
 	
 	else
-	gl_FragColor.xyz=vec3(0.0,0.0,0.0);
+	FragColor.xyz=vec3(0.0,0.0,0.0);
 }  

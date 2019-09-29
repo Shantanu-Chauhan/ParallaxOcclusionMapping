@@ -5,7 +5,10 @@
 ////////////////////////////////////////////////////////////////////////
 
 #include "framework.h"
-
+#include<glew.h>
+#include<imgui.h>
+#include<imgui_impl_glfw.h>
+#include<imgui_impl_opengl3.h>
 Scene scene;
 
 ////////////////////////////////////////////////////////////////////////
@@ -13,7 +16,7 @@ Scene scene;
 int main(int argc, char** argv)
 {
 	GLFWwindow* window;
-	//glfwSetErrorCallback(error_callback);
+
 	if (!glfwInit())
 	{
 		 //Initialization failed
@@ -36,26 +39,44 @@ int main(int argc, char** argv)
 	glewExperimental = true;
 	glewInit();
 	
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+
+	// Setup Dear ImGui style
+	ImGui::StyleColorsDark();
+
 	scene.width = 750;
 	scene.height = 750;
     printf("OpenGL Version: %s\n", glGetString(GL_VERSION));
     printf("GLSL Version: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
     printf("Rendered by: %s\n", glGetString(GL_RENDERER));
     fflush(stdout);
+	const char* glsl_version = "#version 330";
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL3_Init(glsl_version);
 
-	while (true)
+    InitInteraction(window);
+    scene.InitializeScene();
+	while (!glfwWindowShouldClose(window))
 	{
 		glfwPollEvents();
+
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+		ImGui::Begin("TEST");
+		ImGui::Text("This is some useful text.");
+		ImGui::End();
+		ImGui::Render();
+		scene.DrawScene();
+
+		int display_w, display_h;
+		/*glfwGetFramebufferSize(window, &display_w, &display_h);
+		glViewport(0, 0, display_w, display_h);
+		glClearColor(0.0f, 0.0f, 0.0, 0.0f);
+		glClear(GL_COLOR_BUFFER_BIT);*/
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		glfwSwapBuffers(window);
 	}
-    // Initialize interaction and the scene to be drawn.
-    //InitInteraction();
-    //scene.InitializeScene();
-
-    // Enter the event loop.
-    //glutMainLoop();
-}
-
-void error_callback(int error, const char* description)
-{
-	fprintf(stderr, "Error: %s\n", description);
 }

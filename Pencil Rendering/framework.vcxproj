@@ -54,15 +54,15 @@
     <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\Users\Pikachu\Desktop\PencilRendering\Pencil Rendering\libs\glew\include\GL;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\libs\glew\include\GL;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>C:\Users\Pikachu\Desktop\PencilRendering\Pencil Rendering\libs\glew\include\GL;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\libs\glew\include\GL;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>libs\glm;libs</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>libs\glm;libs;libs\imgui</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;FREEGLUT_STATIC;_LIB;FREEGLUT_LIB_PRAGMAS=0;_ITERATOR_DEBUG_LEVEL=2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -81,12 +81,12 @@
       <DataExecutionPrevention>
       </DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalLibraryDirectories>C:\Users\Pikachu\Desktop\PencilRendering\Pencil Rendering\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>libs\glm;libs</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>libs\glm;libs;libs\imgui</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;FREEGLUT_STATIC;_LIB;FREEGLUT_LIB_PRAGMAS=0;_ITERATOR_DEBUG_LEVEL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>
@@ -105,13 +105,18 @@
       <DataExecutionPrevention>
       </DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalLibraryDirectories>C:\Users\Pikachu\Desktop\PencilRendering\Pencil Rendering\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="fbo.cpp" />
     <ClCompile Include="framework.cpp">
     </ClCompile>
+    <ClCompile Include="libs\imgui\imgui.cpp" />
+    <ClCompile Include="libs\imgui\imgui_draw.cpp" />
+    <ClCompile Include="libs\imgui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="libs\imgui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="libs\imgui\imgui_widgets.cpp" />
     <ClCompile Include="rply.c" />
     <ClCompile Include="scene.cpp">
     </ClCompile>
@@ -128,23 +133,62 @@
   <ItemGroup>
     <None Include="Ambient.frag" />
     <None Include="Ambient.vert" />
+    <None Include="box.ply" />
     <None Include="Gbuffer.frag" />
     <None Include="Gbuffer.vert" />
-    <None Include="lighting.frag" />
-    <None Include="lighting.vert" />
-    <None Include="LightingCalc.frag" />
-    <None Include="LightingCalc.vert" />
     <None Include="LightingPass.frag" />
     <None Include="LightingPass.vert" />
     <None Include="LocalLight.frag" />
     <None Include="LocalLight.vert" />
     <None Include="ReflectionPass1.frag" />
     <None Include="ReflectionPass1.vert" />
+    <None Include="room.ply" />
     <None Include="shadow.frag" />
     <None Include="shadow.vert" />
+    <None Include="textures\images.zip" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="fbo.h" />
+    <ClInclude Include="framework.h" />
+    <ClInclude Include="interact.h" />
+    <ClInclude Include="libs\imgui\imconfig.h" />
+    <ClInclude Include="libs\imgui\imgui.h" />
+    <ClInclude Include="libs\imgui\imgui_impl_glfw.h" />
+    <ClInclude Include="libs\imgui\imgui_impl_opengl3.h" />
+    <ClInclude Include="libs\imgui\imgui_internal.h" />
+    <ClInclude Include="libs\imgui\imstb_rectpack.h" />
+    <ClInclude Include="libs\imgui\imstb_textedit.h" />
+    <ClInclude Include="libs\imgui\imstb_truetype.h" />
+    <ClInclude Include="object.h" />
+    <ClInclude Include="rply.h" />
+    <ClInclude Include="scene.h" />
+    <ClInclude Include="shader.h" />
+    <ClInclude Include="shapes.h" />
+    <ClInclude Include="simplexnoise.h" />
+    <ClInclude Include="texture.h" />
+    <ClInclude Include="transform.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="libs\imgui\LICENSE.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="textures\6670-bump.jpg" />
+    <Image Include="textures\6670-diffuse.jpg" />
+    <Image Include="textures\6670-normal.jpg" />
+    <Image Include="textures\box.png" />
+    <Image Include="textures\Brazilian_rosewood_pxr128_normal.png" />
+    <Image Include="textures\brick.png" />
+    <Image Include="textures\cracks.png" />
+    <Image Include="textures\earth.png" />
+    <Image Include="textures\effects.png" />
+    <Image Include="textures\grass.jpg" />
+    <Image Include="textures\my-house-01.png" />
+    <Image Include="textures\Ocean.png" />
+    <Image Include="textures\oceannormalmap.png" />
+    <Image Include="textures\ripples_normalmap.png" />
+    <Image Include="textures\sky.jpg" />
+    <Image Include="textures\sky1.jpg" />
+    <Image Include="textures\Standard_red_pxr128_normal.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -10,5 +10,7 @@
 //    glutKeyboardFunc and glutKeyboardUpFunc: called whenever a key is pressed or released
 //    glutMouseFunc:  called when a mouse button is pressed or released
 //    glutMotionFunc: called when the mouse is moved
+#include<glfw/glfw3.h>
+void InitInteraction(GLFWwindow* window);
 
-void InitInteraction();
+
