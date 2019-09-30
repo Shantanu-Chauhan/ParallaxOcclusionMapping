@@ -35,22 +35,26 @@ uniform sampler2D gAlbedoSpec;
 uniform sampler2D Diffuse;
 
 void main()
-{    
-	vec2 Position=gl_FragCoord.xy;
+{   
+
+vec2 Position=gl_FragCoord.xy;
 	Position.x=Position.x/width;
 	Position.y=Position.y/height;
 
 	vec4 GPosition=texture(gPosition, Position);
 	vec3 N = texture(gNormal, Position).xyz;
-    
+	vec3 Kd = texture(Diffuse, Position).xyz; 
+	vec3 Ks=texture(gAlbedoSpec, Position).xyz;
+
+if(GBufferNum == 0)
+{
+	
 	vec3 L = normalize(lightPos-GPosition.xyz);//lightpos-gposition?
 	
 	vec3 eye=(WorldInverse*vec4(0,0,0,1)).xyz;
 	vec3 eyeVec=eye-GPosition.xyz;
 	vec3 V= normalize(eyeVec);
 
-	vec3 Kd = texture(Diffuse, Position).xyz; 
-	vec3 Ks=texture(gAlbedoSpec, Position).xyz;
 
 	vec3 Ii=Light;
 	float alpha=texture(gAlbedoSpec, Position).w;
@@ -91,7 +95,8 @@ void main()
 	}
 	else
 	FragColor.xyz=vec3(0,0,0);//Outside Only ambient
-
+}
+	else 
 	if(GBufferNum == 1)
 	{
 		FragColor.xyz = GPosition.xyz;

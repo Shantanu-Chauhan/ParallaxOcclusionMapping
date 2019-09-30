@@ -123,9 +123,9 @@ Object* FramedPicture(const MAT4& modelTr, const int objectId,
 // A callback procedure, called regularly to update the atime global
 // variable.
 float atime = 0.0;
-void animate()
+void animate(int speed)
 {
-	atime = 360.0 * glfwGetTime() / 36;
+	atime = 360.0 * glfwGetTime() / speed;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -156,6 +156,10 @@ void Scene::InitializeScene()
 	a = false;
 	s = false;
 	d = false;
+	teapotPos = glm::vec3(0.2, 0.0, 1.5);
+	Light = vec3(3.5, 3.5, 3.5);
+	Ambient = vec3(0.2, 0.2, 0.2);//:light and ambient set
+	AmbientLight = vec3(0.3, 0.3, 0.3);
 	CHECKERROR;
 	objectRoot = new Object(nullptr, nullId);
 
@@ -163,11 +167,11 @@ void Scene::InitializeScene()
 	lightSpin = 150.0;
 	lightTilt = -45.0;
 	lightDist = 1000.0;
-	numberoflights = 1000;
+	numberoflights = 2000;
 	srand(time(nullptr));
 	float x, y, z, r, g, b = 0.0f;
 	const int numberOfRows = 50;
-	const int numberOfColumns = 20;
+	const int numberOfColumns = 40;
 	for (int i = 0; i < numberOfRows; i++)
 	{
 		for (int j = 0; j < numberOfColumns; j++)
@@ -175,7 +179,10 @@ void Scene::InitializeScene()
 			x = i - 20;
 			y = j - 10;
 			z = 10.0f;
-			r = g = b = 1.0f;
+			//r = g = b = 1.0f;
+			r = (rand() % 1000) / 100;
+			g = (rand() % 1000) / 100;
+			b = (rand() % 1000) / 100;
 			lights.push_back(vec3(x, y, z));
 			lightcolor.push_back(vec3(r, g, b));
 		}
@@ -354,10 +361,9 @@ void Scene::DrawScene()
 		(*m)->animTr = Rotate(2, atime);
 
 	// Compute Viewing and Perspective transformations.
-	MAT4 WorldProj, WorldView, WorldInverse;
 	const int delta_time = glfwGetTime() - time_since_last_refresh;
-	const float speed = 0.01f;
-	const float step = speed * delta_time;
+	const float speed = 0.50f;
+	const float step = speed * 1.5f;
 	rx = ry * ((float)width / (float)height);
 	// Compute any continuously animating objects
 	if (eyee)
@@ -386,9 +392,8 @@ void Scene::DrawScene()
 
 	WorldProj = Perspective(rx, ry, front, back);
 	invert(&WorldView, &WorldInverse);
-	const vec3 Teapot(0.2, 0.0, 1.5);
-	const vec3 Light(3.5, 3.5, 3.5), Ambient(0.2, 0.2, 0.2);//:light and ambient set
-	vec3 AmbientLight(0.3, 0.3, 0.3);
+
+	//---------------------------------------------------      GBUFFER PROGRAM
 
 	glDisable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
@@ -432,6 +437,10 @@ void Scene::DrawScene()
 	glDisable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
 
+	//---------------------------------------------------      GBUFFER PROGRAM
+
+	//---------------------------------------------------      AMBIENT PROGRAM
+
 	AmbientProgram->Use();
 	programId = AmbientProgram->programId;
 
@@ -453,8 +462,16 @@ void Scene::DrawScene()
 
 	CHECKERROR;
 	AmbientProgram->Unuse();
-	//SHADOW SHADER START
+	//---------------------------------------------------     AMBIENT PROGRAM
 
+
+	//---------------------------------------------------     SHADOW PROGRAM
+
+	const glm::vec3 Lightpos = glm::vec3(lPos[0], lPos[1], lPos[2]);
+	MAT4 LightView = LookAt(Lightpos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	float nry;
+	nry = 40.0 / lightDist;
+	MAT4 LightProj = Perspective(nry, nry, front, back);
 
 	glDisable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
@@ -466,13 +483,7 @@ void Scene::DrawScene()
 	glClear(GL_DEPTH_BUFFER_BIT);
 	programId = shadowProgram->programId;
 
-	const glm::vec3 Lightpos = glm::vec3(lPos[0], lPos[1], lPos[2]);
 
-	MAT4 LightView = LookAt(Lightpos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-	float nry;
-	nry = 40.0 / lightDist;
-	MAT4 LightProj = Perspective(nry, nry, front, back);
-	//shadow
 	loc = glGetUniformLocation(programId, "LightProj");
 	glUniformMatrix4fv(loc, 1, GL_TRUE, LightProj.Pntr());
 	loc = glGetUniformLocation(programId, "LightView");
@@ -491,8 +502,10 @@ void Scene::DrawScene()
 	glActiveTexture(GL_TEXTURE2); // Activate texture unit 2
 	glBindTexture(GL_TEXTURE_2D, shadow.textureID); // Load texture into it
 
-	//SHADOW SHADER END!!!
+	////---------------------------------------------------     SHADOW PROGRAM
 
+
+	//---------------------------------------------------     LIGHTING PROGRAM
 	MAT4 ShadowMatrix;
 	ShadowMatrix = Translate(0.5f, 0.5f, 0.5f) * Scale(0.5f, 0.5f, 0.5f) * LightProj * LightView;
 
@@ -536,14 +549,15 @@ void Scene::DrawScene()
 
 	LightingProgram->Unuse();
 
+	//---------------------------------------------------     LIGHTING PROGRAM
 
-	//INFINITE LIGHTS
+	//---------------------------------------------------     LOCAL LIGHTS PROGRAM
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE, GL_ONE);
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_FRONT);
-	glDisable(GL_CULL_FACE);
+
 
 	LocalLightProgram->Use();
 	programId = LocalLightProgram->programId;
@@ -571,21 +585,21 @@ void Scene::DrawScene()
 	loc = glGetUniformLocation(programId, "radius");
 	glUniform1f(loc, radius);
 
-	////int number = 1000;
-	//
+	vec3 center;
 	for (int i = 0; i < numberoflights; i++)
 	{
-		//vec3 LightColor(1.0, 0, 0);
 		loc = glGetUniformLocation(programId, "Light");
 		glUniform3fv(loc, 1, &(lightcolor[i][0]));
-		//draw geometry to invoke the pixel shader
-		vec3 center(lights[i].x, lights[i].y, 1);
+		center = vec3(lights[i].x, lights[i].y, 1);
 		loc = glGetUniformLocation(programId, "center");
 		glUniform3fv(loc, 1, &(center[0]));
 		localLights->Draw(LocalLightProgram, Translate(lights[i].x, lights[i].y, 1) * Scale(radius, radius, radius));
 	}
 	LocalLightProgram->Unuse();
-	animate();
+	glDisable(GL_CULL_FACE);
+	//---------------------------------------------------     LOCAL LIGHTS PROGRAM
+
+	animate(36);
 	time_since_last_refresh = glfwGetTime();
 	const float end = glfwGetTime() - start;
 }

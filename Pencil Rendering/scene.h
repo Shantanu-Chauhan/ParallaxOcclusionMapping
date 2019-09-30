@@ -40,7 +40,8 @@ public:
     // good place for the transformation values which are set by the
     // user mouse/keyboard actions and used in DrawScene to create the
     // transformation matrices.
-
+	MAT4 WorldProj, WorldView, WorldInverse;
+	vec3 teapotPos , Light, Ambient , AmbientLight;
     ProceduralGround* ground;
 
     // Light position parameters

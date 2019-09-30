@@ -35,8 +35,8 @@ void main()
 	Position.x=Position.x/width;
 	Position.y=Position.y/height;
 
-		vec4 GPosition=texture(gPosition, Position);
-		float distance = length(center - GPosition.xyz);
+	vec4 GPosition=texture(gPosition, Position);
+	float distance = length(center - GPosition.xyz);
 	 if(distance < radius)
 	{
 		vec3 N = texture(gNormal, Position).xyz;
@@ -67,7 +67,6 @@ void main()
 		vec3 BRDF=(Kd/3.14)+((F*G*D)/4);
 		FragColor.xyz=Ii*LN*BRDF;
 	}
-	
 	else
 	FragColor.xyz=vec3(0.0,0.0,0.0);
 }  

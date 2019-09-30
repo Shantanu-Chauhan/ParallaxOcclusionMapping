@@ -58,6 +58,7 @@ int main(int argc, char** argv)
 
     InitInteraction(window,&io);
     scene.InitializeScene();
+	int selection = 0;
 	while (!glfwWindowShouldClose(window))
 	{
 		glfwPollEvents();
@@ -65,7 +66,38 @@ int main(int argc, char** argv)
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 		ImGui::Begin("PencilRendering");
-		ImGui::InputInt("GBuffer Draw", &scene.GBufferNum,1);
+		bool selected = true;
+		std::string labels[5] = {"Lighting", "WorldPos","Diffuse","Specular","Normal" };
+		const char* label = labels[selection].c_str();
+		if (ImGui::BeginCombo("Select G - Buffer", label))
+		{
+			if (ImGui::Selectable("Lighting", selected))
+			{
+				scene.GBufferNum = 0;
+				selection = 0;
+			}
+			if (ImGui::Selectable("WorldPos", selected))
+			{
+				scene.GBufferNum = 1;
+				selection = 1;
+			}
+			if (ImGui::Selectable("Diffuse", selected))
+			{
+				scene.GBufferNum = 2;
+				selection = 2;
+			}
+			if (ImGui::Selectable("Specular", selected))
+			{
+				scene.GBufferNum = 3;
+				selection = 3;
+			}
+			if (ImGui::Selectable("Normal", selected))
+			{
+				scene.GBufferNum = 4;
+				selection = 4;
+			}
+			ImGui::EndCombo();
+		}
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		ImGui::End();
 		ImGui::Render();
