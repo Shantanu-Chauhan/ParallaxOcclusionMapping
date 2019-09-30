@@ -56,7 +56,7 @@ void KeyboardDown(GLFWwindow* window, int key, int scancode, int action, int mod
 	
 	if (state == GLFW_PRESS)
 	{
-		printf("key down %c(%d)\n", key, key);
+		//printf("key down %c(%d)\n", key, key);
 		switch (key) {
 		case GLFW_KEY_W:
 			scene.w = true;
@@ -85,7 +85,7 @@ void KeyboardDown(GLFWwindow* window, int key, int scancode, int action, int mod
 	else
 		if (state == GLFW_RELEASE)
 		{
-			printf("key up %c(%d)\n", key, key);
+			//printf("key up %c(%d)\n", key, key);
 			switch (key)
 			{
 			case GLFW_KEY_W:
@@ -119,17 +119,17 @@ void MouseButton(GLFWwindow* window, int button, int action, int mods)
 	
 	if (button == GLFW_MOUSE_BUTTON_LEFT) {
 		leftDown = (action == GLFW_PRESS);
-		printf("Left button down\n");
+		//printf("Left button down\n");
 	}
 
 	else if (button == GLFW_MOUSE_BUTTON_MIDDLE) {
 		middleDown = (action == GLFW_PRESS);
-		printf("Middle button down\n");
+		//printf("Middle button down\n");
 	}
 
 	else if (button == GLFW_MOUSE_BUTTON_RIGHT) {
 		rightDown = (action == GLFW_PRESS);
-		printf("Right button down\n");
+		//printf("Right button down\n");
 	}
 
 	if (io->WantCaptureKeyboard == true)
@@ -187,23 +187,23 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	// Figure out the mouse action, and handle accordingly
 	if (yoffset>0 && shifted) { // Scroll light in
 		scene.lightDist = pow(scene.lightDist, 1.0f / 1.02f);
-		printf("shifted scroll up\n");
+		//printf("shifted scroll up\n");
 	}
 
 	else if (yoffset<0 && shifted) { // Scroll light out
 		scene.lightDist = pow(scene.lightDist, 1.02f);
-		printf("shifted scroll down\n");
+		//printf("shifted scroll down\n");
 	}
 
 	else if (yoffset>0) {
 		scene.zoom /= 1.2f;
 
-		printf("scroll up\n");
+		//printf("scroll up\n");
 	}
 
 	else if (yoffset<0 ) {
 		scene.zoom *= 1.2f;
-		printf("scroll down\n");
+		//printf("scroll down\n");
 	}
 }
 

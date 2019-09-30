@@ -132,8 +132,36 @@ void animate(int speed)
 // InitializeScene is called once during setup to create all the
 // textures, shape VAOs, and shader programs as well as setting a
 // number of other parameters.
+
+void Scene::CreateLights()
+{
+	srand(time(nullptr));
+	float x, y, z, r, g, b = 0.0f;
+	if (!lights.empty())
+	{
+		lights.clear();
+		lightcolor.clear();
+	}
+	for (int i = 0; i < numberOfRows; i++)
+	{
+		for (int j = 0; j < numberOfColumns; j++)
+		{
+			x = i - 20;
+			y = j - 10;
+			z = 10.0f;
+			//r = g = b = 1.0f;
+			r = (rand() % 1000) / 100;
+			g = (rand() % 1000) / 100;
+			b = (rand() % 1000) / 100;
+			lights.push_back(vec3(x, y, z));
+			lightcolor.push_back(vec3(r, g, b));
+		}
+	}
+
+}
 void Scene::InitializeScene()
 {
+	localLightsToggle= true;
 	GBufferNum = 0;
 	glEnable(GL_DEPTH_TEST);
 	CHECKERROR;
@@ -150,7 +178,7 @@ void Scene::InitializeScene()
 	front = 0.1f;
 	back = 1000.0;
 	eye = vec3(0.0f, -10.0f, 0.0f);
-	time_since_last_refresh = 0;
+	time_since_last_refresh = 0.0f;
 	eyee = true;
 	w = false;
 	a = false;
@@ -162,31 +190,15 @@ void Scene::InitializeScene()
 	AmbientLight = vec3(0.3, 0.3, 0.3);
 	CHECKERROR;
 	objectRoot = new Object(nullptr, nullId);
-
+	numberoflights = 2000;
+	numberOfRows = 50;
+	numberOfColumns = 40;
+	CreateLights();
 	// Set the initial light position parammeters
 	lightSpin = 150.0;
 	lightTilt = -45.0;
 	lightDist = 1000.0;
-	numberoflights = 2000;
-	srand(time(nullptr));
-	float x, y, z, r, g, b = 0.0f;
-	const int numberOfRows = 50;
-	const int numberOfColumns = 40;
-	for (int i = 0; i < numberOfRows; i++)
-	{
-		for (int j = 0; j < numberOfColumns; j++)
-		{
-			x = i - 20;
-			y = j - 10;
-			z = 10.0f;
-			//r = g = b = 1.0f;
-			r = (rand() % 1000) / 100;
-			g = (rand() % 1000) / 100;
-			b = (rand() % 1000) / 100;
-			lights.push_back(vec3(x, y, z));
-			lightcolor.push_back(vec3(r, g, b));
-		}
-	}
+	
 
 	//for (float i = 0.0f; i < numberoflights; i++)
 	//{
@@ -345,7 +357,8 @@ void Scene::InitializeScene()
 // goals.)
 void Scene::DrawScene()
 {
-	const float start = glfwGetTime();
+	const float start = glfwGetTime() / 10000.0f;
+
 	// Calculate the light's position.
 	const float lPos[4] = {
 	   basePoint.x + lightDist * cos(lightSpin * rad) * sin(lightTilt * rad),
@@ -361,9 +374,9 @@ void Scene::DrawScene()
 		(*m)->animTr = Rotate(2, atime);
 
 	// Compute Viewing and Perspective transformations.
-	const int delta_time = glfwGetTime() - time_since_last_refresh;
-	const float speed = 0.50f;
-	const float step = speed * 1.5f;
+	const float speed = 5.0f;
+	const float step = speed * time_since_last_refresh;
+	//printf("Start %f\n", time_since_last_refresh);
 	rx = ry * ((float)width / (float)height);
 	// Compute any continuously animating objects
 	if (eyee)
@@ -552,55 +565,59 @@ void Scene::DrawScene()
 	//---------------------------------------------------     LIGHTING PROGRAM
 
 	//---------------------------------------------------     LOCAL LIGHTS PROGRAM
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_ONE, GL_ONE);
-	glDisable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_FRONT);
-
-
-	LocalLightProgram->Use();
-	programId = LocalLightProgram->programId;
-	loc = glGetUniformLocation(programId, "WorldProj");
-	glUniformMatrix4fv(loc, 1, GL_TRUE, WorldProj.Pntr());
-	loc = glGetUniformLocation(programId, "WorldView");
-	glUniformMatrix4fv(loc, 1, GL_TRUE, WorldView.Pntr());
-	loc = glGetUniformLocation(programId, "WorldInverse");
-	glUniformMatrix4fv(loc, 1, GL_TRUE, WorldInverse.Pntr());
-	loc = glGetUniformLocation(programId, "lightPos");
-	glUniform3fv(loc, 1, &(lPos[0]));
-	loc = glGetUniformLocation(programId, "gPosition");
-	glUniform1i(loc, 7);
-	loc = glGetUniformLocation(programId, "gNormal");
-	glUniform1i(loc, 8);
-	loc = glGetUniformLocation(programId, "gAlbedoSpec");
-	glUniform1i(loc, 9);
-	loc = glGetUniformLocation(programId, "Diffuse");
-	glUniform1i(loc, 10);
-	loc = glGetUniformLocation(programId, "width");
-	glUniform1f(loc, width);
-	loc = glGetUniformLocation(programId, "height");
-	glUniform1f(loc, height);
-	const float radius = 1.0f;
-	loc = glGetUniformLocation(programId, "radius");
-	glUniform1f(loc, radius);
-
-	vec3 center;
-	for (int i = 0; i < numberoflights; i++)
+	if(localLightsToggle)
 	{
-		loc = glGetUniformLocation(programId, "Light");
-		glUniform3fv(loc, 1, &(lightcolor[i][0]));
-		center = vec3(lights[i].x, lights[i].y, 1);
-		loc = glGetUniformLocation(programId, "center");
-		glUniform3fv(loc, 1, &(center[0]));
-		localLights->Draw(LocalLightProgram, Translate(lights[i].x, lights[i].y, 1) * Scale(radius, radius, radius));
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_ONE, GL_ONE);
+		glDisable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_FRONT);
+
+
+		LocalLightProgram->Use();
+		programId = LocalLightProgram->programId;
+		loc = glGetUniformLocation(programId, "WorldProj");
+		glUniformMatrix4fv(loc, 1, GL_TRUE, WorldProj.Pntr());
+		loc = glGetUniformLocation(programId, "WorldView");
+		glUniformMatrix4fv(loc, 1, GL_TRUE, WorldView.Pntr());
+		loc = glGetUniformLocation(programId, "WorldInverse");
+		glUniformMatrix4fv(loc, 1, GL_TRUE, WorldInverse.Pntr());
+		loc = glGetUniformLocation(programId, "lightPos");
+		glUniform3fv(loc, 1, &(lPos[0]));
+		loc = glGetUniformLocation(programId, "gPosition");
+		glUniform1i(loc, 7);
+		loc = glGetUniformLocation(programId, "gNormal");
+		glUniform1i(loc, 8);
+		loc = glGetUniformLocation(programId, "gAlbedoSpec");
+		glUniform1i(loc, 9);
+		loc = glGetUniformLocation(programId, "Diffuse");
+		glUniform1i(loc, 10);
+		loc = glGetUniformLocation(programId, "width");
+		glUniform1f(loc, width);
+		loc = glGetUniformLocation(programId, "height");
+		glUniform1f(loc, height);
+		const float radius = 1.1f;
+		loc = glGetUniformLocation(programId, "radius");
+		glUniform1f(loc, radius);
+
+		vec3 center;
+		for (int i = 0; i < numberoflights; i++)
+		{
+			loc = glGetUniformLocation(programId, "Light");
+			glUniform3fv(loc, 1, &(lightcolor[i][0]));
+			center = vec3(lights[i].x, lights[i].y, 1);
+			loc = glGetUniformLocation(programId, "center");
+			glUniform3fv(loc, 1, &(center[0]));
+			localLights->Draw(LocalLightProgram, Translate(lights[i].x, lights[i].y, 1) * Scale(radius, radius, radius));
+		}
+		LocalLightProgram->Unuse();
+		glDisable(GL_CULL_FACE);
+
 	}
-	LocalLightProgram->Unuse();
-	glDisable(GL_CULL_FACE);
 	//---------------------------------------------------     LOCAL LIGHTS PROGRAM
 
 	animate(36);
-	time_since_last_refresh = glfwGetTime();
-	const float end = glfwGetTime() - start;
+	const float end = glfwGetTime() / 1000.0f - start;
+	time_since_last_refresh = end;
 }
 

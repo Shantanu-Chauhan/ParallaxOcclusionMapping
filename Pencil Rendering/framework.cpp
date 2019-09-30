@@ -59,6 +59,7 @@ int main(int argc, char** argv)
     InitInteraction(window,&io);
     scene.InitializeScene();
 	int selection = 0;
+	int rows=0, columns=0, number = 0;
 	while (!glfwWindowShouldClose(window))
 	{
 		glfwPollEvents();
@@ -69,6 +70,16 @@ int main(int argc, char** argv)
 		bool selected = true;
 		std::string labels[5] = {"Lighting", "WorldPos","Diffuse","Specular","Normal" };
 		const char* label = labels[selection].c_str();
+		ImGui::InputInt("Number of Local Lights", &number,100);
+		ImGui::InputInt("Number of Rows", &rows,5);
+		ImGui::InputInt("Number of Columns", &columns,5);
+		if(ImGui::Button("Apply", ImVec2(50.0f, 20.0f)))
+		{
+			scene.numberoflights = number;
+			scene.numberOfColumns = columns;
+			scene.numberOfRows = rows;
+			scene.CreateLights();
+		}
 		if (ImGui::BeginCombo("Select G - Buffer", label))
 		{
 			if (ImGui::Selectable("Lighting", selected))

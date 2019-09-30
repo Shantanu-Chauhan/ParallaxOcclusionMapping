@@ -77,7 +77,7 @@ public:
     void DrawScene();
 
 	int GBufferNum;
-
+	void CreateLights();
 	//Variables
 	 float spin;
 	 float tilt;
@@ -88,7 +88,7 @@ public:
 	 float front;
 	 float back;
 	 float rx;
-	 int time_since_last_refresh;
+	 float time_since_last_refresh;
 	 vec3 eye;
 	 bool w;
 	 bool a;
@@ -96,4 +96,7 @@ public:
 	 bool d;
 	 bool eyee;
 	 int debug;
+	 bool localLightsToggle;
+	 int numberOfRows;
+	 int numberOfColumns;
 };
