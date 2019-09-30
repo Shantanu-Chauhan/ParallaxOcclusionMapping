@@ -18,13 +18,14 @@ const int     spheresId	= 10;
 
 in vec3 normalVec;
 in vec4 FragPos;
-
+out vec4 FragColor;
 uniform int objectId;
 uniform vec3 diffuse;//Kd
 
 uniform vec3 specular;//Ks
 uniform float shininess;//alpha exponent
 
+uniform int GBufferNum;
 
 layout (location = 0) out vec4 gPosition;
 layout (location = 1) out vec3 gNormal;
@@ -34,17 +35,16 @@ layout (location = 3) out vec3 Diffuse;
 
 void main()
 {    
-    // store the fragment position vector in the first gbuffer texture
-    gPosition = FragPos;
-    
+	// store the fragment position vector in the first gbuffer texture
+	gPosition = FragPos;
+	
 	// also store the per-fragment normals into the gbuffer
-   gNormal = normalize(normalVec);
-   
-   // and the diffuse per-fragment color
-    gAlbedoSpec.rgb = specular;
-   
-   // store specular intensity in gAlbedoSpec's alpha component
-    gAlbedoSpec.a = shininess;
+	gNormal = normalize(normalVec);
+	   
+	// and the diffuse per-fragment color
+	gAlbedoSpec.rgb = specular;
+	   
+	// store specular intensity in gAlbedoSpec's alpha component
+	gAlbedoSpec.a = shininess;
 	Diffuse=diffuse;
-
 }  

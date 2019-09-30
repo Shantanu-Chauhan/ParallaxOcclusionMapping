@@ -63,20 +63,19 @@ public:
 	//vec3 lights[1000];
 	//vec3 lightcolor[1000];
     // Shader programs
-    ShaderProgram* lightingProgram;//lighting
 	ShaderProgram* shadowProgram;//shadow
-	ShaderProgram* reflectionProgram1;
 	ShaderProgram* GbufferProgram;
 	ShaderProgram* AmbientProgram;
 	ShaderProgram* LightingProgram;
 	ShaderProgram* LocalLightProgram;
+
 	FBO shadow;
-	FBO reflection1;
-	FBO reflection2;
 	FBO Gbuffer;
     //void append(Object* m) { objects.push_back(m); }
     void InitializeScene();
     void DrawScene();
+
+	int GBufferNum;
 
 	//Variables
 	 float spin;

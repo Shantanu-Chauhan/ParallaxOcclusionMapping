@@ -26,6 +26,7 @@ uniform mat4 WorldInverse,ShadowMatrix;
 uniform vec3 lightPos;
 uniform vec3 Light;
 
+uniform int GBufferNum;
 
 uniform sampler2D shadowMap;
 uniform sampler2D gPosition;
@@ -90,5 +91,22 @@ void main()
 	}
 	else
 	FragColor.xyz=vec3(0,0,0);//Outside Only ambient
+
+	if(GBufferNum == 1)
+	{
+		FragColor.xyz = GPosition.xyz;
+	}
+	else if(GBufferNum == 2)
+	{
+		FragColor.xyz = Ks;
+	}
+	if(GBufferNum == 3)
+	{
+		FragColor.xyz = Kd;
+	}
+	if(GBufferNum == 4)
+	{
+		FragColor.xyz = N;
+	}
 
 }  
