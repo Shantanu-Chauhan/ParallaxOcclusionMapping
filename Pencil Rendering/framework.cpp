@@ -68,6 +68,7 @@ int main(int argc, char** argv)
 		ImGui::NewFrame();
 		ImGui::Begin("PencilRendering");
 		bool selected = true;
+		ImGui::Checkbox("Local", &scene.localLightsToggle);
 		std::string labels[5] = {"Lighting", "WorldPos","Diffuse","Specular","Normal" };
 		const char* label = labels[selection].c_str();
 		ImGui::InputInt("Number of Local Lights", &number,100);

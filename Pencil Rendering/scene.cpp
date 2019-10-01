@@ -148,7 +148,7 @@ void Scene::CreateLights()
 		{
 			x = i - 20;
 			y = j - 10;
-			z = 10.0f;
+			z = 25.0f;
 			//r = g = b = 1.0f;
 			r = (rand() % 1000) / 100;
 			g = (rand() % 1000) / 100;
@@ -157,10 +157,13 @@ void Scene::CreateLights()
 			lightcolor.push_back(vec3(r, g, b));
 		}
 	}
+	lights.push_back(vec3(0.0f,0.0f,20.0f));
+	lightcolor.push_back(vec3(1.0f,0.0f,0.0f));
 
 }
 void Scene::InitializeScene()
 {
+	glBlendFunc(GL_ONE, GL_ONE);
 	localLightsToggle= true;
 	GBufferNum = 0;
 	glEnable(GL_DEPTH_TEST);
@@ -185,9 +188,9 @@ void Scene::InitializeScene()
 	s = false;
 	d = false;
 	teapotPos = glm::vec3(0.2, 0.0, 1.5);
-	Light = vec3(3.5, 3.5, 3.5);
+	Light = vec3(1.0, 1.0, 1.0);
 	Ambient = vec3(0.2, 0.2, 0.2);//:light and ambient set
-	AmbientLight = vec3(0.3, 0.3, 0.3);
+	AmbientLight = vec3(0.5, 0.5, 0.5);
 	CHECKERROR;
 	objectRoot = new Object(nullptr, nullId);
 	numberoflights = 2000;
@@ -282,11 +285,11 @@ void Scene::InitializeScene()
 	Object* central = new Object(NULL, nullId);
 	Object* anim = new Object(NULL, nullId);
 	Object* room = new Object(RoomPolygons, roomId, brickColor, vec3(0.0, 0.0, 0.0), 1);
-	Object* teapot = new Object(TeapotPolygons, teapotId, brassColor, vec3(0.5, 0.5, 0.5), 120);
-	Object* podium = new Object(BoxPolygons, boxId, vec3(woodColor), vec3(0.3, 0.3, 0.3), 10);
+	Object* teapot = new Object(TeapotPolygons, teapotId, brassColor, vec3(0.5, 0.5	, 0.5), 120);
+	Object* podium = new Object(BoxPolygons, boxId, vec3(woodColor), vec3(0.5, 0.5, 0.5), 10);
 	Object* sky = new Object(SpherePolygons, skyId, vec3(), vec3(), 0);
 	Object* ground = new Object(GroundPolygons, groundId, grassColor, vec3(0.0, 0.0, 0.0), 1);
-	Object* sea = new Object(SeaPolygons, seaId, waterColor, vec3(1.0, 1.0, 1.0), 120);
+	Object* sea = new Object(SeaPolygons, seaId, waterColor, vec3(0.1, 0.1, 0.1), 120);
 	Object* spheres = SphereOfSpheres(SpherePolygons);
 	Object* leftFrame = FramedPicture(Identity, lPicId, BoxPolygons, QuadPolygons);
 	Object* rightFrame = FramedPicture(Identity, rPicId, BoxPolygons, QuadPolygons);
@@ -525,6 +528,7 @@ void Scene::DrawScene()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE, GL_ONE);
 	glDisable(GL_DEPTH_TEST);
+
 	glViewport(0, 0, width, height);
 	LightingProgram->Use();
 
@@ -568,10 +572,9 @@ void Scene::DrawScene()
 	if(localLightsToggle)
 	{
 		glEnable(GL_BLEND);
-		glBlendFunc(GL_ONE, GL_ONE);
 		glDisable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
-		glCullFace(GL_FRONT);
+		glCullFace(GL_BACK);
 
 
 		LocalLightProgram->Use();
@@ -582,8 +585,7 @@ void Scene::DrawScene()
 		glUniformMatrix4fv(loc, 1, GL_TRUE, WorldView.Pntr());
 		loc = glGetUniformLocation(programId, "WorldInverse");
 		glUniformMatrix4fv(loc, 1, GL_TRUE, WorldInverse.Pntr());
-		loc = glGetUniformLocation(programId, "lightPos");
-		glUniform3fv(loc, 1, &(lPos[0]));
+		
 		loc = glGetUniformLocation(programId, "gPosition");
 		glUniform1i(loc, 7);
 		loc = glGetUniformLocation(programId, "gNormal");
@@ -601,15 +603,27 @@ void Scene::DrawScene()
 		glUniform1f(loc, radius);
 
 		vec3 center;
-		for (int i = 0; i < numberoflights; i++)
+		/*for (int i = 0; i < numberoflights; i++)
 		{
 			loc = glGetUniformLocation(programId, "Light");
 			glUniform3fv(loc, 1, &(lightcolor[i][0]));
 			center = vec3(lights[i].x, lights[i].y, 1);
+			loc = glGetUniformLocation(programId, "lightPos");
+			glUniform3fv(loc, 1, &(center[0]));
 			loc = glGetUniformLocation(programId, "center");
 			glUniform3fv(loc, 1, &(center[0]));
 			localLights->Draw(LocalLightProgram, Translate(lights[i].x, lights[i].y, 1) * Scale(radius, radius, radius));
 		}
+		glDisable(GL_CULL_FACE);*/
+		glm::vec3 C(1.0, 0.0, 1.0);
+		loc = glGetUniformLocation(programId, "Light");
+		glUniform3fv(loc, 1, &(C[0]));
+		center = vec3(0.0, 0.0, 2.6);
+		loc = glGetUniformLocation(programId, "center");
+		glUniform3fv(loc, 1, &(center[0]));
+		loc = glGetUniformLocation(programId, "lightPos");
+		glUniform3fv(loc, 1, &(center[0]));
+		localLights->Draw(LocalLightProgram, Translate(center.x,center.y,center.z)* Scale(radius, radius, radius));
 		LocalLightProgram->Unuse();
 		glDisable(GL_CULL_FACE);
 

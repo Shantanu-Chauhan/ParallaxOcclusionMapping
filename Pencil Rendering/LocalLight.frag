@@ -40,7 +40,7 @@ void main()
 	float attenuation = clamp(1.0 - distance*distance / (radius * radius), 0.0, 1.0);
 	 if(distance < radius)
 	{
-		vec3 N = texture(gNormal, Position).xyz;
+		vec3 N = normalize(texture(gNormal, Position).xyz);
 		
 		vec3 L = normalize(lightPos-GPosition.xyz);//lightpos-gposition?
 		
@@ -52,7 +52,7 @@ void main()
 		vec3 Ks=texture(gAlbedoSpec, Position).xyz;
 
 		vec3 Ii=Light;
-		Ii = Ii* attenuation;
+		Ii = Ii*attenuation;
 		float alpha=texture(gAlbedoSpec, Position).w;
 		
 		vec3 H = normalize(L+V);
@@ -69,6 +69,7 @@ void main()
 
 		vec3 BRDF=(Kd/3.14)+((F*G*D)/4);
 		FragColor.xyz=Ii*LN*BRDF;
+		//FragColor.xyz=vec3(1.0,0.0,0.0);
 	}
 	else
 	FragColor.xyz=vec3(0.0,0.0,0.0);
