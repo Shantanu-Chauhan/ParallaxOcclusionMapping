@@ -603,7 +603,7 @@ void Scene::DrawScene()
 		glUniform1f(loc, radius);
 
 		vec3 center;
-		/*for (int i = 0; i < numberoflights; i++)
+		for (int i = 0; i < numberoflights; i++)
 		{
 			loc = glGetUniformLocation(programId, "Light");
 			glUniform3fv(loc, 1, &(lightcolor[i][0]));
@@ -614,8 +614,8 @@ void Scene::DrawScene()
 			glUniform3fv(loc, 1, &(center[0]));
 			localLights->Draw(LocalLightProgram, Translate(lights[i].x, lights[i].y, 1) * Scale(radius, radius, radius));
 		}
-		glDisable(GL_CULL_FACE);*/
-		glm::vec3 C(1.0, 0.0, 1.0);
+		glDisable(GL_CULL_FACE);
+		/*glm::vec3 C(1.0, 0.0, 1.0);
 		loc = glGetUniformLocation(programId, "Light");
 		glUniform3fv(loc, 1, &(C[0]));
 		center = vec3(0.0, 0.0, 2.6);
@@ -625,7 +625,7 @@ void Scene::DrawScene()
 		glUniform3fv(loc, 1, &(center[0]));
 		localLights->Draw(LocalLightProgram, Translate(center.x,center.y,center.z)* Scale(radius, radius, radius));
 		LocalLightProgram->Unuse();
-		glDisable(GL_CULL_FACE);
+		glDisable(GL_CULL_FACE);*/
 
 	}
 	//---------------------------------------------------     LOCAL LIGHTS PROGRAM
