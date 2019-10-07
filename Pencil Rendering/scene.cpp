@@ -133,6 +133,8 @@ void animate(int speed)
 // textures, shape VAOs, and shader programs as well as setting a
 // number of other parameters.
 
+
+//Used to initialize the local lights position, color and number in the scene.
 void Scene::CreateLights()
 {
 	srand(time(nullptr));
@@ -147,8 +149,8 @@ void Scene::CreateLights()
 		for (int j = 0; j < numberOfColumns; j++)
 		{
 			x = i - 20;
-			y = j - 10;
-			z = 25.0f;
+			y = j - 20;
+			z = lightHeight;
 			//r = g = b = 1.0f;
 			r = (rand() % 1000) / 100;
 			g = (rand() % 1000) / 100;
@@ -157,14 +159,16 @@ void Scene::CreateLights()
 			lightcolor.push_back(vec3(r, g, b));
 		}
 	}
-	lights.push_back(vec3(0.0f,0.0f,20.0f));
-	lightcolor.push_back(vec3(1.0f,0.0f,0.0f));
+	lights.push_back(vec3(0.0f, 0.0f, 20.0f));
+	lightcolor.push_back(vec3(1.0f, 0.0f, 0.0f));
 
 }
 void Scene::InitializeScene()
 {
 	glBlendFunc(GL_ONE, GL_ONE);
-	localLightsToggle= true;
+	localLightsToggle = true;
+	globalLightToggle = true;
+	lightHeight = 1.0f;
 	GBufferNum = 0;
 	glEnable(GL_DEPTH_TEST);
 	CHECKERROR;
@@ -188,9 +192,8 @@ void Scene::InitializeScene()
 	s = false;
 	d = false;
 	teapotPos = glm::vec3(0.2, 0.0, 1.5);
-	Light = vec3(1.0, 1.0, 1.0);
-	Ambient = vec3(0.2, 0.2, 0.2);//:light and ambient set
-	AmbientLight = vec3(0.5, 0.5, 0.5);
+	Light = vec3(3.0, 3.0, 3.0);
+	AmbientLight = vec3(0.2, 0.2, 0.2);
 	CHECKERROR;
 	objectRoot = new Object(nullptr, nullId);
 	numberoflights = 2000;
@@ -201,23 +204,6 @@ void Scene::InitializeScene()
 	lightSpin = 150.0;
 	lightTilt = -45.0;
 	lightDist = 1000.0;
-	
-
-	//for (float i = 0.0f; i < numberoflights; i++)
-	//{
-
-	//	x = i;
-	//	y = (rand() % 100)-50;
-	//	z = 10.0f;
-	//	r = (rand() % 1000)/100;
-	//	g = (rand() % 1000)/100;
-	//	b = (rand() % 1000)/100;
-	//	//r = 3.5;
-	//	//g = 3.5;
-	//	//b = 3.5;
-	//	lights.push_back(vec3(x, y, z));
-	//	lightcolor.push_back(vec3(r,g,b));
-	//}
 
 	// Enable OpenGL depth-testing
 	glEnable(GL_DEPTH_TEST);
@@ -285,7 +271,7 @@ void Scene::InitializeScene()
 	Object* central = new Object(NULL, nullId);
 	Object* anim = new Object(NULL, nullId);
 	Object* room = new Object(RoomPolygons, roomId, brickColor, vec3(0.0, 0.0, 0.0), 1);
-	Object* teapot = new Object(TeapotPolygons, teapotId, brassColor, vec3(0.5, 0.5	, 0.5), 120);
+	Object* teapot = new Object(TeapotPolygons, teapotId, brassColor, vec3(0.5, 0.5, 0.5), 120);
 	Object* podium = new Object(BoxPolygons, boxId, vec3(woodColor), vec3(0.5, 0.5, 0.5), 10);
 	Object* sky = new Object(SpherePolygons, skyId, vec3(), vec3(), 0);
 	Object* ground = new Object(GroundPolygons, groundId, grassColor, vec3(0.0, 0.0, 0.0), 1);
@@ -524,52 +510,53 @@ void Scene::DrawScene()
 	//---------------------------------------------------     LIGHTING PROGRAM
 	MAT4 ShadowMatrix;
 	ShadowMatrix = Translate(0.5f, 0.5f, 0.5f) * Scale(0.5f, 0.5f, 0.5f) * LightProj * LightView;
-
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE, GL_ONE);
 	glDisable(GL_DEPTH_TEST);
 
 	glViewport(0, 0, width, height);
-	LightingProgram->Use();
+	if (globalLightToggle)
+	{
+		LightingProgram->Use();
 
-	glClear(GL_DEPTH_BUFFER_BIT);
-	programId = LightingProgram->programId;
-	loc = glGetUniformLocation(programId, "ShadowMatrix");
-	glUniformMatrix4fv(loc, 1, GL_TRUE, ShadowMatrix.Pntr());
-	loc = glGetUniformLocation(programId, "WorldInverse");
-	glUniformMatrix4fv(loc, 1, GL_TRUE, WorldInverse.Pntr());
-	loc = glGetUniformLocation(programId, "lightPos");
-	glUniform3fv(loc, 1, &(lPos[0]));
-	loc = glGetUniformLocation(programId, "width");
-	glUniform1f(loc, width);
-	loc = glGetUniformLocation(programId, "height");
-	glUniform1f(loc, height);
-	loc = glGetUniformLocation(programId, "Light");
-	glUniform3fv(loc, 1, &(Light[0]));
-	loc = glGetUniformLocation(programId, "shadowMap");
-	glUniform1i(loc, 2);
-	loc = glGetUniformLocation(programId, "gPosition");
-	glUniform1i(loc, 7);
-	loc = glGetUniformLocation(programId, "gNormal");
-	glUniform1i(loc, 8);
-	loc = glGetUniformLocation(programId, "gAlbedoSpec");
-	glUniform1i(loc, 9);
-	loc = glGetUniformLocation(programId, "Diffuse");
-	glUniform1i(loc, 10);
-	loc = glGetUniformLocation(programId, "GBufferNum");
-	glUniform1i(loc, GBufferNum);
+		glClear(GL_DEPTH_BUFFER_BIT);
+		programId = LightingProgram->programId;
+		loc = glGetUniformLocation(programId, "ShadowMatrix");
+		glUniformMatrix4fv(loc, 1, GL_TRUE, ShadowMatrix.Pntr());
+		loc = glGetUniformLocation(programId, "WorldInverse");
+		glUniformMatrix4fv(loc, 1, GL_TRUE, WorldInverse.Pntr());
+		loc = glGetUniformLocation(programId, "lightPos");
+		glUniform3fv(loc, 1, &(lPos[0]));
+		loc = glGetUniformLocation(programId, "width");
+		glUniform1f(loc, width);
+		loc = glGetUniformLocation(programId, "height");
+		glUniform1f(loc, height);
+		loc = glGetUniformLocation(programId, "Light");
+		glUniform3fv(loc, 1, &(Light[0]));
+		loc = glGetUniformLocation(programId, "shadowMap");
+		glUniform1i(loc, 2);
+		loc = glGetUniformLocation(programId, "gPosition");
+		glUniform1i(loc, 7);
+		loc = glGetUniformLocation(programId, "gNormal");
+		glUniform1i(loc, 8);
+		loc = glGetUniformLocation(programId, "gAlbedoSpec");
+		glUniform1i(loc, 9);
+		loc = glGetUniformLocation(programId, "Diffuse");
+		glUniform1i(loc, 10);
+		loc = glGetUniformLocation(programId, "GBufferNum");
+		glUniform1i(loc, GBufferNum);
 
-	CHECKERROR;
+		CHECKERROR;
 
-	FSQ->Draw(LightingProgram, Identity);
-	CHECKERROR;
+		FSQ->Draw(LightingProgram, Identity);
+		CHECKERROR;
 
-	LightingProgram->Unuse();
-
+		LightingProgram->Unuse();
+	}
 	//---------------------------------------------------     LIGHTING PROGRAM
 
 	//---------------------------------------------------     LOCAL LIGHTS PROGRAM
-	if(localLightsToggle)
+	if (localLightsToggle)
 	{
 		glEnable(GL_BLEND);
 		glDisable(GL_DEPTH_TEST);
@@ -585,7 +572,7 @@ void Scene::DrawScene()
 		glUniformMatrix4fv(loc, 1, GL_TRUE, WorldView.Pntr());
 		loc = glGetUniformLocation(programId, "WorldInverse");
 		glUniformMatrix4fv(loc, 1, GL_TRUE, WorldInverse.Pntr());
-		
+
 		loc = glGetUniformLocation(programId, "gPosition");
 		glUniform1i(loc, 7);
 		loc = glGetUniformLocation(programId, "gNormal");
@@ -607,26 +594,12 @@ void Scene::DrawScene()
 		{
 			loc = glGetUniformLocation(programId, "Light");
 			glUniform3fv(loc, 1, &(lightcolor[i][0]));
-			center = vec3(lights[i].x, lights[i].y, 1);
-			loc = glGetUniformLocation(programId, "lightPos");
-			glUniform3fv(loc, 1, &(center[0]));
+			center = vec3(lights[i].x, lights[i].y, lights[i].z);
 			loc = glGetUniformLocation(programId, "center");
 			glUniform3fv(loc, 1, &(center[0]));
 			localLights->Draw(LocalLightProgram, Translate(lights[i].x, lights[i].y, 1) * Scale(radius, radius, radius));
 		}
 		glDisable(GL_CULL_FACE);
-		/*glm::vec3 C(1.0, 0.0, 1.0);
-		loc = glGetUniformLocation(programId, "Light");
-		glUniform3fv(loc, 1, &(C[0]));
-		center = vec3(0.0, 0.0, 2.6);
-		loc = glGetUniformLocation(programId, "center");
-		glUniform3fv(loc, 1, &(center[0]));
-		loc = glGetUniformLocation(programId, "lightPos");
-		glUniform3fv(loc, 1, &(center[0]));
-		localLights->Draw(LocalLightProgram, Translate(center.x,center.y,center.z)* Scale(radius, radius, radius));
-		LocalLightProgram->Unuse();
-		glDisable(GL_CULL_FACE);*/
-
 	}
 	//---------------------------------------------------     LOCAL LIGHTS PROGRAM
 

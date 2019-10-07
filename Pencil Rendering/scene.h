@@ -97,6 +97,8 @@ public:
 	 bool eyee;
 	 int debug;
 	 bool localLightsToggle;
+	 bool globalLightToggle;
 	 int numberOfRows;
 	 int numberOfColumns;
+	 float lightHeight;
 };

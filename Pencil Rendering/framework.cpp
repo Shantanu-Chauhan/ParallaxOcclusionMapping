@@ -29,7 +29,7 @@ int main(int argc, char** argv)
 	glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, 1);
 
-	window = glfwCreateWindow(750, 750, "Simple example", nullptr, nullptr);
+	window = glfwCreateWindow(1024, 720, "Deffered Shading", nullptr, nullptr);
 	glfwMakeContextCurrent(window);
 	if (!window)	
 	{
@@ -46,8 +46,8 @@ int main(int argc, char** argv)
 	// Setup Dear ImGui style
 	ImGui::StyleColorsDark();
 
-	scene.width = 750;
-	scene.height = 750;
+	scene.width = 1024;
+	scene.height = 720;
     printf("OpenGL Version: %s\n", glGetString(GL_VERSION));
     printf("GLSL Version: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
     printf("Rendered by: %s\n", glGetString(GL_RENDERER));
@@ -59,16 +59,18 @@ int main(int argc, char** argv)
     InitInteraction(window,&io);
     scene.InitializeScene();
 	int selection = 0;
-	int rows=0, columns=0, number = 0;
+	int rows=scene.numberOfRows, columns=scene.numberOfColumns, number = scene.numberoflights;
+	float height = scene.lightHeight;
 	while (!glfwWindowShouldClose(window))
 	{
 		glfwPollEvents();
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
-		ImGui::Begin("PencilRendering");
+		ImGui::Begin("Deffered Shading");
 		bool selected = true;
-		ImGui::Checkbox("Local", &scene.localLightsToggle);
+		ImGui::Checkbox("Local Lights", &scene.localLightsToggle);
+		ImGui::Checkbox("Global Light ", &scene.globalLightToggle);
 		std::string labels[5] = {"Lighting", "WorldPos","Diffuse","Specular","Normal" };
 		const char* label = labels[selection].c_str();
 		ImGui::InputInt("Number of Local Lights", &number,100);
@@ -79,6 +81,7 @@ int main(int argc, char** argv)
 			scene.numberoflights = number;
 			scene.numberOfColumns = columns;
 			scene.numberOfRows = rows;
+			scene.lightHeight = height;
 			scene.CreateLights();
 		}
 		if (ImGui::BeginCombo("Select G - Buffer", label))

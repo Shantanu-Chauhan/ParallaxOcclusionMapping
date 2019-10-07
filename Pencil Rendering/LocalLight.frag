@@ -42,7 +42,7 @@ void main()
 	{
 		vec3 N = normalize(texture(gNormal, Position).xyz);
 		
-		vec3 L = normalize(lightPos-GPosition.xyz);//lightpos-gposition?
+		vec3 L = normalize(center-GPosition.xyz);//lightpos-gposition?
 		
 		vec3 eye=(WorldInverse*vec4(0,0,0,1)).xyz;
 		vec3 eyeVec=eye-GPosition.xyz;
