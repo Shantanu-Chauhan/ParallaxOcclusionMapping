@@ -1,0 +1,30 @@
+/////////////////////////////////////////////////////////////////////////
+// Compute shader
+////////////////////////////////////////////////////////////////////////
+#version 430 // Version of OpenGL with COMPUTE shader support
+
+layout (local_size_x = 128, local_size_y = 1, local_size_z = 1) in; // Declares thread group size
+
+uniform blurKernel {float weights[101]; }; // Declares a uniform block
+
+layout (rgba32f) uniform readonly image2D src; // src image as single channel 32bit float readonly
+
+layout (rgba32f) uniform writeonly image2D dst; // dst image as single channel 32bit float writeonly
+
+shared float v[128+101]; // Variable shared with other threads in the 128x1 thread group
+
+void main() {
+
+ ivec2 gpos = ivec2(gl_GlobalInvocationID.xy); // Combo of groupID, groupSize and localID
+
+ uint i = gl_LocalInvocationID.x; // Local thread id in the 128x1 thread groups128x1
+
+ v[i] = imageLoad(src, gpos+...); // read an image pixel at an ivec2(.,.) position
+
+ if (i<2*w) v[i+128] = imageLoad(src, gpos+...); // read extra 2*w pixels
+
+ barrier(); // Wait for all threads to catchup before reading v[]
+
+
+ imageStore(dst, gpos, ...); // Write to destination image
+}

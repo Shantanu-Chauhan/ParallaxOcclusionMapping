@@ -69,6 +69,7 @@ public:
 	ShaderProgram* AmbientProgram;
 	ShaderProgram* LightingProgram;
 	ShaderProgram* LocalLightProgram;
+	ShaderProgram* computeShaderProgram;
 
 	FBO shadow;
 	FBO Gbuffer;
@@ -76,6 +77,7 @@ public:
     void InitializeScene();
     void DrawScene();
 
+	unsigned int blockID;
 	int GBufferNum;
 	void CreateLights();
 	//Variables

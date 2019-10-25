@@ -20,5 +20,9 @@ in vec4 position;
 
 void main()
 {
-	FragColor =vec4(position.x,position.y,position.z,position.w);
+	float z = position.w;
+	float zSq = z*z;
+	float zCube = zSq*z;
+	float zQuad = zCube * z;
+	FragColor =vec4(z,zSq,zCube,zQuad);
 }

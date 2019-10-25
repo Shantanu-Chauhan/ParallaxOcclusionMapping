@@ -134,6 +134,7 @@
     <None Include="Ambient.frag" />
     <None Include="Ambient.vert" />
     <None Include="box.ply" />
+    <None Include="ComputeShader.comp" />
     <None Include="Gbuffer.frag" />
     <None Include="Gbuffer.vert" />
     <None Include="LightingPass.frag" />

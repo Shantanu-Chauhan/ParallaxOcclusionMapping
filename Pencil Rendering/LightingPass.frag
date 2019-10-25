@@ -82,7 +82,7 @@ if(GBufferNum == 0)
 		vec2 shadowIndex = ShadowCoord.xy/ShadowCoord.w;
 	if(shadowIndex.x>=0 && shadowIndex.x<=1 && shadowIndex.y>=0 && shadowIndex.y<=1) 
 		{
-			float lightdepth = texture(shadowMap, shadowIndex).w;
+			float lightdepth = texture(shadowMap, shadowIndex).x;
 			float pixeldepth = ShadowCoord.w;
 
 			if(pixeldepth > lightdepth+0.008)//(0.008 is the offset)The pixel is in shadow

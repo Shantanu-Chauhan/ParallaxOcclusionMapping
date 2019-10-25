@@ -214,6 +214,14 @@ void Scene::InitializeScene()
 
 	basePoint = ground->highPoint;
 
+	////Creating Computer shader program
+	//computeShaderProgram = new ShaderProgram();
+	//computeShaderProgram->AddShader("ComputerShader.comp", GL_COMPUTE_SHADER);
+	//computeShaderProgram->LinkProgram();
+	////Creating Computer shader program
+
+
+
 	LightingProgram = new ShaderProgram();
 	LightingProgram->AddShader("LightingPass.vert", GL_VERTEX_SHADER);
 	LightingProgram->AddShader("LightingPass.frag", GL_FRAGMENT_SHADER);
@@ -505,6 +513,35 @@ void Scene::DrawScene()
 	glBindTexture(GL_TEXTURE_2D, shadow.textureID); // Load texture into it
 
 	////---------------------------------------------------     SHADOW PROGRAM
+
+	////---------------------------------------------------     SHADOW BLUR
+
+	computeShaderProgram->Use();
+	programId = computeShaderProgram->programId;
+
+	glDispatchCompute(width / 128, height, 1);// Tiles WxH image with groups sized 128x1 
+	glUseProgram(0);	glGenBuffers(1, &blockID); // Generates block
+	int bindpoint = 0; // Start at zero, increment for other blocks
+	loc = glGetUniformBlockIndex(programId, "blurKernel");
+	glUniformBlockBinding(programId, loc, bindpoint);
+
+	glBindBufferBase(GL_UNIFORM_BUFFER, bindpoint, blockID);
+	glBufferData(GL_UNIFORM_BUFFER, #bytes, data, GL_STATIC_DRAW);	//a texture to the shader as an image2D
+	int imageUnit = 0; // Increment for other images
+	loc = glGetUniformLocation(programId, "src");
+	glBindImageTexture(imageUnit, 2, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+	loc = glGetUniformLocation(programId, "dst");
+	glBindImageTexture(imageUnit, 2, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+	glUniform1i(loc, imageUnit);
+	// Change GL_READ_ONLY to GL_WRITE_ONLY for output image
+	// Change GL_R32F to GL_RGBA32F for 4 channel images
+
+	computeShaderProgram->Unuse();
+
+
+	////---------------------------------------------------     SHADOW BLUR
+
+
 
 
 	//---------------------------------------------------     LIGHTING PROGRAM
