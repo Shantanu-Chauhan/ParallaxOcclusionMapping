@@ -1,0 +1,59 @@
+/////////////////////////////////////////////////////////////////////////
+// Compute shader
+////////////////////////////////////////////////////////////////////////
+#version 430 // Version of OpenGL with COMPUTE shader support
+
+// Declares thread group size
+layout (local_size_x = 128, local_size_y = 1, local_size_z = 1) in;
+
+
+//w: half-size of kernel
+uniform uint weight;
+
+// Declares a uniform block
+uniform blurKernel {float weights[101]; }; 
+
+// src image as single channel 32bit float readonly
+layout (rgba32f) uniform readonly image2D src; 
+
+// dst image as single channel 32bit float writeonly
+layout (rgba32f) uniform writeonly image2D dst; 
+
+// Variable shared with other threads in the 128x1 thread group
+shared vec4 v[128+101]; 
+
+void main() {
+
+ // Combo of groupID, groupSize and localID
+ ivec2 gpos = ivec2(gl_GlobalInvocationID.xy); 
+
+ // Local thread id in the 128x1 thread groups128x1
+ uint i = gl_LocalInvocationID.y; 
+
+ // read an image pixel at an ivec2(.,.) position
+ v[i] = imageLoad(src, gpos+ivec2(0,-weight)); 
+
+ // read extra 2*w pixels
+ if (i<2*weight) 
+ {
+	v[i+128] = imageLoad(src, gpos+ivec2(0,128-weight)); 
+ }
+
+ // Wait for all threads to catchup before reading v[]
+ barrier(); 
+ 
+//Compute sum of weights[0 … 2w] times corresponding pixels v[i … i+2w]
+
+vec4 sum = vec4(0.0, 0.0, 0.0, 0.0);
+
+for(uint j = i; j <= (i+2*weight); ++j)
+{
+	sum += v[j]*weights[j - i];
+}
+
+//Store sum at gpos in dst image
+//imageStore(dst, gpos, sum)
+
+ // Write to destination image
+ imageStore(dst, gpos, sum); 
+}

@@ -165,6 +165,8 @@ void Scene::CreateLights()
 }
 void Scene::InitializeScene()
 {
+	shadowWidth = 2048;
+	shadowHeight = 2048;
 	glBlendFunc(GL_ONE, GL_ONE);
 	localLightsToggle = true;
 	globalLightToggle = true;
@@ -214,13 +216,17 @@ void Scene::InitializeScene()
 
 	basePoint = ground->highPoint;
 
-	////Creating Computer shader program
-	//computeShaderProgram = new ShaderProgram();
-	//computeShaderProgram->AddShader("ComputerShader.comp", GL_COMPUTE_SHADER);
-	//computeShaderProgram->LinkProgram();
-	////Creating Computer shader program
+	//Creating Computer shader program
+	computeShaderProgramHorizontal = new ShaderProgram();
+	computeShaderProgramHorizontal->AddShader("ComputeShaderHorizontal.comp", GL_COMPUTE_SHADER);
+	computeShaderProgramHorizontal->LinkProgram();
+	//Creating Computer shader program
 
-
+	//Creating Computer shader program
+	computeShaderProgramVertical = new ShaderProgram();
+	computeShaderProgramVertical->AddShader("ComputeShaderVertical.comp", GL_COMPUTE_SHADER);
+	computeShaderProgramVertical->LinkProgram();
+	//Creating Computer shader program
 
 	LightingProgram = new ShaderProgram();
 	LightingProgram->AddShader("LightingPass.vert", GL_VERTEX_SHADER);
@@ -343,8 +349,11 @@ void Scene::InitializeScene()
 	room->add(leftFrame, Translate(-1.5, 9.85, 1.) * Scale(0.8, 0.8, 0.8));
 	room->add(rightFrame, Translate(1.5, 9.85, 1.) * Scale(0.8, 0.8, 0.8));
 
-	shadow.CreateFBO(2048, 2048);
+	shadow.CreateFBO(shadowWidth, shadowHeight);
 	Gbuffer.CreateG(width, height);
+	InterBlur.CreateFBO(shadowWidth, shadowHeight);
+	FinalBlur.CreateFBO(shadowWidth, shadowHeight);
+	glGenBuffers(1, &blockID); // Generates block
 	CHECKERROR;
 }
 
@@ -429,21 +438,6 @@ void Scene::DrawScene()
 	Gbuffer.Unbind();
 
 	GbufferProgram->Unuse();
-
-	glActiveTexture(GL_TEXTURE7);
-	glBindTexture(GL_TEXTURE_2D, Gbuffer.gPosition);
-
-	glActiveTexture(GL_TEXTURE8);
-	glBindTexture(GL_TEXTURE_2D, Gbuffer.gNormal);
-
-	glActiveTexture(GL_TEXTURE9);
-	glBindTexture(GL_TEXTURE_2D, Gbuffer.gAlbedoSpec);
-
-	glActiveTexture(GL_TEXTURE10);
-	glBindTexture(GL_TEXTURE_2D, Gbuffer.Diffuse);
-
-
-
 	glDisable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
 
@@ -457,8 +451,11 @@ void Scene::DrawScene()
 	loc = glGetUniformLocation(programId, "Ambient");
 	glUniform3fv(loc, 1, &(AmbientLight[0]));
 
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, Gbuffer.Diffuse);
+
 	loc = glGetUniformLocation(programId, "Diffuse");
-	glUniform1i(loc, 10);
+	glUniform1i(loc, 0);
 
 	loc = glGetUniformLocation(programId, "width");
 	glUniform1f(loc, width);
@@ -509,40 +506,34 @@ void Scene::DrawScene()
 	shadowProgram->Unuse();
 	CHECKERROR;
 
-	glActiveTexture(GL_TEXTURE2); // Activate texture unit 2
-	glBindTexture(GL_TEXTURE_2D, shadow.textureID); // Load texture into it
 
 	////---------------------------------------------------     SHADOW PROGRAM
 
-	////---------------------------------------------------     SHADOW BLUR
+	////---------------------------------------------------     Horizontal SHADOW BLUR
 
-	computeShaderProgram->Use();
-	programId = computeShaderProgram->programId;
+	unsigned int KernalSize = 10;
+	std::vector<float> Filter = BlurFiler(KernalSize);
 
-	glDispatchCompute(width / 128, height, 1);// Tiles WxH image with groups sized 128x1 
-	glUseProgram(0);	glGenBuffers(1, &blockID); // Generates block
+	computeShaderProgramHorizontal->Use();
+	programId = computeShaderProgramHorizontal->programId;
 	int bindpoint = 0; // Start at zero, increment for other blocks
 	loc = glGetUniformBlockIndex(programId, "blurKernel");
 	glUniformBlockBinding(programId, loc, bindpoint);
-
 	glBindBufferBase(GL_UNIFORM_BUFFER, bindpoint, blockID);
-	glBufferData(GL_UNIFORM_BUFFER, #bytes, data, GL_STATIC_DRAW);	//a texture to the shader as an image2D
-	int imageUnit = 0; // Increment for other images
+	glBufferData(GL_UNIFORM_BUFFER, sizeof(float) * 2 * (KernalSize + 1), &Filter, GL_STATIC_DRAW);	//a texture to the shader as an image2D	
 	loc = glGetUniformLocation(programId, "src");
-	glBindImageTexture(imageUnit, 2, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+	glBindImageTexture(0, shadow.textureID, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+	glUniform1i(loc, 0);
 	loc = glGetUniformLocation(programId, "dst");
-	glBindImageTexture(imageUnit, 2, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
-	glUniform1i(loc, imageUnit);
-	// Change GL_READ_ONLY to GL_WRITE_ONLY for output image
-	// Change GL_R32F to GL_RGBA32F for 4 channel images
+	glBindImageTexture(1, InterBlur.textureID, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);	glUniform1i(loc, 1);
+	loc = glGetUniformLocation(programId, "weight");
+	glUniform1f(loc, KernalSize / 2);
+	glDispatchCompute(shadowWidth / 128, shadowHeight, 1);// Tiles WxH image with groups sized 128x1 
+	computeShaderProgramHorizontal->Unuse();
 
-	computeShaderProgram->Unuse();
+	//	////---------------------------------------------------     Horizontal SHADOW BLUR
 
-
-	////---------------------------------------------------     SHADOW BLUR
-
-
-
+	//}
 
 	//---------------------------------------------------     LIGHTING PROGRAM
 	MAT4 ShadowMatrix;
@@ -570,21 +561,35 @@ void Scene::DrawScene()
 		glUniform1f(loc, height);
 		loc = glGetUniformLocation(programId, "Light");
 		glUniform3fv(loc, 1, &(Light[0]));
+
+		glActiveTexture(GL_TEXTURE0); // Activate texture unit 2
+		glBindTexture(GL_TEXTURE_2D, shadow.textureID); // Load texture into it
+
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, Gbuffer.gPosition);
+
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, Gbuffer.gNormal);
+
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, Gbuffer.gAlbedoSpec);
+
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_2D, Gbuffer.Diffuse);
 		loc = glGetUniformLocation(programId, "shadowMap");
-		glUniform1i(loc, 2);
+		glUniform1i(loc, 0);
 		loc = glGetUniformLocation(programId, "gPosition");
-		glUniform1i(loc, 7);
+		glUniform1i(loc, 1);
 		loc = glGetUniformLocation(programId, "gNormal");
-		glUniform1i(loc, 8);
+		glUniform1i(loc, 2);
 		loc = glGetUniformLocation(programId, "gAlbedoSpec");
-		glUniform1i(loc, 9);
+		glUniform1i(loc, 3);
 		loc = glGetUniformLocation(programId, "Diffuse");
-		glUniform1i(loc, 10);
+		glUniform1i(loc, 4);
 		loc = glGetUniformLocation(programId, "GBufferNum");
 		glUniform1i(loc, GBufferNum);
 
 		CHECKERROR;
-
 		FSQ->Draw(LightingProgram, Identity);
 		CHECKERROR;
 
@@ -610,14 +615,26 @@ void Scene::DrawScene()
 		loc = glGetUniformLocation(programId, "WorldInverse");
 		glUniformMatrix4fv(loc, 1, GL_TRUE, WorldInverse.Pntr());
 
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, Gbuffer.gPosition);
+
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, Gbuffer.gNormal);
+
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, Gbuffer.gAlbedoSpec);
+
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, Gbuffer.Diffuse);
+
 		loc = glGetUniformLocation(programId, "gPosition");
-		glUniform1i(loc, 7);
+		glUniform1i(loc, 0);
 		loc = glGetUniformLocation(programId, "gNormal");
-		glUniform1i(loc, 8);
+		glUniform1i(loc, 1);
 		loc = glGetUniformLocation(programId, "gAlbedoSpec");
-		glUniform1i(loc, 9);
+		glUniform1i(loc, 2);
 		loc = glGetUniformLocation(programId, "Diffuse");
-		glUniform1i(loc, 10);
+		glUniform1i(loc, 3);
 		loc = glGetUniformLocation(programId, "width");
 		glUniform1f(loc, width);
 		loc = glGetUniformLocation(programId, "height");
@@ -645,3 +662,28 @@ void Scene::DrawScene()
 	time_since_last_refresh = end;
 }
 
+std::vector<float>Scene::BlurFiler(int weight)
+{
+	//Declare thread - group - shared - memory v[128 + 2 * w + 1] floats
+		//actually must be constant size : v[128 + <largest filter size>]
+	//limit weight to something???
+	int Weight = weight;
+	std::vector<float> weights;
+	float s = weight / 2.0f;
+	// s=w/2 controls the
+	//width of the bell curve. (The usual recommendation of s = w / 3 puts too many near - zeros at
+	//the ends of the weight array which is inefficient for real - time uses.)
+	float totalWeight = 0.0f;
+	for (int i = -Weight; i <= Weight; ++i)
+	{
+		float exp = (-(i * i)) / (2.0f * s * s);
+		float actualWeight = std::exp2f(exp);
+		weights.push_back(actualWeight);
+		totalWeight += actualWeight;
+	}
+	for (auto& weight : weights)
+	{
+		weight /= totalWeight;
+	}
+	return weights;
+}

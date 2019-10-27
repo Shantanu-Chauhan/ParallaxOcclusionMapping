@@ -18,6 +18,7 @@ class Texture
  public:
     unsigned int textureId;
     Texture(const std::string &filename);
+    Texture(int width, int height);
 
     void Bind(const int unit, const int programId, const std::string& name);
     void Unbind();
