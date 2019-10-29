@@ -71,10 +71,13 @@ int main(int argc, char** argv)
 		bool selected = true;
 		ImGui::Checkbox("Local Lights", &scene.localLightsToggle);
 		ImGui::Checkbox("Global Light ", &scene.globalLightToggle);
-		std::string labels[5] = {"Lighting", "WorldPos","Diffuse","Specular","Normal" };
+		std::string labels[6] = {"Lighting", "WorldPos","Diffuse","Specular","Normal","Shadow" };
 		const char* label = labels[selection].c_str();
 		ImGui::InputInt("Number of Local Lights", &number,100);
 		ImGui::InputInt("Number of Rows", &rows,5);
+		ImGui::InputInt("Number of Columns", &columns,5);
+		ImGui::InputFloat("Alpha", &scene.alpha,0.0001f,0.0001f);
+		ImGui::InputFloat("Maxdepth", &scene.maxdepth,100.0f, 1000.0f);
 		ImGui::InputInt("Number of Columns", &columns,5);
 		if(ImGui::Button("Apply", ImVec2(50.0f, 20.0f)))
 		{
@@ -110,6 +113,11 @@ int main(int argc, char** argv)
 			{
 				scene.GBufferNum = 4;
 				selection = 4;
+			}
+			if (ImGui::Selectable("Shadow", selected))
+			{
+				scene.GBufferNum = 5;
+				selection = 5;
 			}
 			ImGui::EndCombo();
 		}

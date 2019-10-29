@@ -47,7 +47,7 @@ Texture::Texture(int width, int height)
 	glBindTexture(GL_TEXTURE_2D, textureId);
 	glTexImage2D(GL_TEXTURE_2D, 0, (GLint)GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 10);
-	glGenerateMipmap(GL_TEXTURE_2D);
+	//glGenerateMipmap(GL_TEXTURE_2D);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (int)GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (int)GL_LINEAR_MIPMAP_LINEAR);
@@ -66,13 +66,13 @@ void Texture::Bind(const int unit, const int programId, const std::string& name)
     glUniform1i(loc, unit);
 }
 
-void Texture::Bind(const int unit, const int programId, const std::string& name)
-{
-	glActiveTexture((GLenum)((int)GL_TEXTURE0 + unit));
-	glBindTexture(GL_TEXTURE_2D, textureId);
-	int loc = glGetUniformLocation(programId, name.c_str());
-	glUniform1i(loc, unit);
-}
+//void Texture::Bind(const int unit, const int programId, const std::string& name)
+//{
+//	glActiveTexture((GLenum)((int)GL_TEXTURE0 + unit));
+//	glBindTexture(GL_TEXTURE_2D, textureId);
+//	int loc = glGetUniformLocation(programId, name.c_str());
+//	glUniform1i(loc, unit);
+//}
 
 // Unbind a texture from a texture unit whne no longer needed.
 void Texture::Unbind()

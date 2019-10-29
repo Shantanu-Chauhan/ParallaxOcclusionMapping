@@ -86,6 +86,9 @@ public:
 	int GBufferNum;
 	void CreateLights();
 	//Variables
+
+	float maxdepth;
+	float alpha;
 	float spin;
 	float tilt;
 	float tx;

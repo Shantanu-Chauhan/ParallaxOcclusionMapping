@@ -4,7 +4,7 @@
 #version 430 // Version of OpenGL with COMPUTE shader support
 
 // Declares thread group size
-layout (local_size_x = 128, local_size_y = 1, local_size_z = 1) in;
+layout (local_size_x = 1, local_size_y = 128, local_size_z = 1) in;
 
 
 //w: half-size of kernel
