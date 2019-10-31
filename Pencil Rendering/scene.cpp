@@ -165,6 +165,8 @@ void Scene::CreateLights()
 }
 void Scene::InitializeScene()
 {
+	KernalSize = 2;
+	Filter = BlurFiler(KernalSize);
 	shadowWidth = 2048;
 	shadowHeight = 2048;
 	glBlendFunc(GL_ONE, GL_ONE);
@@ -175,7 +177,7 @@ void Scene::InitializeScene()
 	glEnable(GL_DEPTH_TEST);
 	CHECKERROR;
 	maxdepth = 0.5f;
-	alpha = 0.4f;
+	alpha = 0.088f;
 	// FIXME: This is a good place for initializing the transformation
 	// values.
 	debug = 0;
@@ -514,8 +516,8 @@ void Scene::DrawScene()
 
 	////---------------------------------------------------     Horizontal SHADOW BLUR
 
-	unsigned int KernalSize = 3;
-	std::vector<float> Filter = BlurFiler(KernalSize);
+
+	
 	{
 		//InterBlur.Bind();
 		computeShaderProgramHorizontal->Use();
@@ -731,6 +733,19 @@ void Scene::DrawScene()
 
 std::vector<float>Scene::BlurFiler(int weight)
 {
+
+	//Highly optimized code! (*!STAR!*)
+	//blurSize = 5;
+	//int s = blurSize / 2;
+	//float normB = 1.0f / (s * sqrt(3.141592f * 2));
+	//for (int i = -blurSize; i <= blurSize; ++i)
+	//	//for (int i = 0; i <= blurSize; ++i)
+	//{
+	//	float w = normB * exp(-(i * i) / (2.0f * s * s));
+	//	blurWeights.emplace_back(w);
+	//}
+
+
 	//Declare thread - group - shared - memory v[128 + 2 * w + 1] floats
 		//actually must be constant size : v[128 + <largest filter size>]
 	//limit weight to something???

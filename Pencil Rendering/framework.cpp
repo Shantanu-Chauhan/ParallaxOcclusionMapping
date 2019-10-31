@@ -61,6 +61,7 @@ int main(int argc, char** argv)
 	int selection = 0;
 	int rows=scene.numberOfRows, columns=scene.numberOfColumns, number = scene.numberoflights;
 	float height = scene.lightHeight;
+	int kernal = scene.KernalSize;
 	while (!glfwWindowShouldClose(window))
 	{
 		glfwPollEvents();
@@ -86,6 +87,12 @@ int main(int argc, char** argv)
 			scene.numberOfRows = rows;
 			scene.lightHeight = height;
 			scene.CreateLights();
+		}
+		ImGui::InputInt("Kernal Size", &kernal);
+		if (ImGui::Button("Make new Kernal", ImVec2(50.0f, 20.0f)))
+		{
+			scene.KernalSize = kernal;
+			scene.Filter = scene.BlurFiler(scene.KernalSize);
 		}
 		if (ImGui::BeginCombo("Select G - Buffer", label))
 		{

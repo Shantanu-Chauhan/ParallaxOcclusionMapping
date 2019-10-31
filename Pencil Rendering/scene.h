@@ -86,7 +86,8 @@ public:
 	int GBufferNum;
 	void CreateLights();
 	//Variables
-
+	unsigned int KernalSize;
+	std::vector<float> Filter;
 	float maxdepth;
 	float alpha;
 	float spin;
