@@ -31,6 +31,7 @@ uniform vec3 Light;
 uniform int GBufferNum;
 
 uniform sampler2D shadowMap;
+uniform sampler2D blurShadowMap;
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;
 uniform sampler2D gAlbedoSpec;
@@ -104,7 +105,7 @@ if(GBufferNum == 0)
 		vec2 shadowIndex = ShadowCoord.xy/ShadowCoord.w;
 	if(shadowIndex.x>=0 && shadowIndex.x<=1 && shadowIndex.y>=0 && shadowIndex.y<=1) 
 		{
-			vec4 lightdepth = texture(shadowMap, shadowIndex); //b
+			vec4 lightdepth = texture(blurShadowMap, shadowIndex); //b
 			float pixeldepth = ShadowCoord.w;   //zf
 	
 			vec4 bprime = (1 - alphaaa)* lightdepth + (alphaaa)*vec4(maxdepth);
@@ -176,7 +177,12 @@ if(GBufferNum == 0)
 	else
 	if(GBufferNum == 5)
 	{
-		FragColor.xyz = vec3(texture(shadowMap , Position).x);
+		FragColor.xyz = vec3(texture(shadowMap , Position).x/1000.0);
+	}
+	else
+	if(GBufferNum == 6)
+	{
+		FragColor.xyz = vec3(texture(blurShadowMap , Position).x/1000.0);
 	}
 
 }  

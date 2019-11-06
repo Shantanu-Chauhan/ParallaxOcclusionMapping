@@ -447,35 +447,35 @@ void Scene::DrawScene()
 	//---------------------------------------------------      GBUFFER PROGRAM
 
 	//---------------------------------------------------      AMBIENT PROGRAM
+	if(GBufferNum == 0){
+		AmbientProgram->Use();
+		programId = AmbientProgram->programId;
 
-	AmbientProgram->Use();
-	programId = AmbientProgram->programId;
+		loc = glGetUniformLocation(programId, "Ambient");
+		glUniform3fv(loc, 1, &(AmbientLight[0]));
 
-	loc = glGetUniformLocation(programId, "Ambient");
-	glUniform3fv(loc, 1, &(AmbientLight[0]));
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, Gbuffer.Diffuse);
 
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, Gbuffer.Diffuse);
+		loc = glGetUniformLocation(programId, "Diffuse");
+		glUniform1i(loc, 0);
 
-	loc = glGetUniformLocation(programId, "Diffuse");
-	glUniform1i(loc, 0);
+		loc = glGetUniformLocation(programId, "width");
+		glUniform1f(loc, width);
 
-	loc = glGetUniformLocation(programId, "width");
-	glUniform1f(loc, width);
+		loc = glGetUniformLocation(programId, "height");
+		glUniform1f(loc, height);
 
-	loc = glGetUniformLocation(programId, "height");
-	glUniform1f(loc, height);
+		CHECKERROR;
 
-	CHECKERROR;
+		FSQ->Draw(AmbientProgram, Identity);
 
-	FSQ->Draw(AmbientProgram, Identity);
-
-	CHECKERROR;
-	AmbientProgram->Unuse();
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	//---------------------------------------------------     AMBIENT PROGRAM
-
+		CHECKERROR;
+		AmbientProgram->Unuse();
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, 0);
+		//---------------------------------------------------     AMBIENT PROGRAM
+	}
 
 	//---------------------------------------------------     SHADOW PROGRAM
 
@@ -607,7 +607,7 @@ void Scene::DrawScene()
 		glBindTexture(GL_TEXTURE_2D, Gbuffer.gPosition);
 
 		glActiveTexture(GL_TEXTURE0); // Activate texture unit 2
-		glBindTexture(GL_TEXTURE_2D, FinalBlur.textureID); // Load texture into it
+		glBindTexture(GL_TEXTURE_2D, shadow.textureID); // Load texture into it
 
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, Gbuffer.gNormal);
@@ -617,6 +617,9 @@ void Scene::DrawScene()
 
 		glActiveTexture(GL_TEXTURE4);
 		glBindTexture(GL_TEXTURE_2D, Gbuffer.Diffuse);
+
+		glActiveTexture(GL_TEXTURE5); // Activate texture unit 2
+		glBindTexture(GL_TEXTURE_2D, FinalBlur.textureID); // Load texture into it
 
 		loc = glGetUniformLocation(programId, "shadowMap");
 		glUniform1i(loc, 0);
@@ -628,6 +631,8 @@ void Scene::DrawScene()
 		glUniform1i(loc, 3);
 		loc = glGetUniformLocation(programId, "Diffuse");
 		glUniform1i(loc, 4);
+		loc = glGetUniformLocation(programId, "blurShadowMap");
+		glUniform1i(loc, 5);
 		loc = glGetUniformLocation(programId, "GBufferNum");
 		glUniform1i(loc, GBufferNum);
 
