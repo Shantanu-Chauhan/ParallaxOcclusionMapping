@@ -37,23 +37,22 @@ uniform sampler2D gNormal;
 uniform sampler2D gAlbedoSpec;
 uniform sampler2D Diffuse;
 
-vec3 Cholesky(float m11, float m12, float m13, float m22, float m23, float m33, float z1, float z2, float z3)
+vec3 Cholesky(float m11, float m12,float m13,float m22,float m23,float m33,float z1,float z2,float z3)
 {
-    float a = sqrt(m11);
-    float b = m12 / a;
-    float c = m13 / a;
-    float d = sqrt(m22 - (b*b));
-    float e = (m23 - b*c) / d;
-    float f = sqrt(m33 - c*c - e*e);
+   // float a,b,c,d,e,f,c1,c2,c3,c11,c22,c33;
+    float a=sqrt(m11);
+    float b=m12/a;
+    float c=m13/a;
+    float d=sqrt(m22 - b*b);
+    float e = (m23 - b*c)/d;
+    float f=sqrt(m33 - c*c-e*e);
+    float c11 = z1/a;
+    float c22=(z2-b*c11)/d;
+    float c33 = (z3 - c*c11-e*c22)/f;
 
-    float c1p = z1 / a;
-    float c2p = (z2 - b*c1p) / d;
-    float c3p = (z3 - c*c1p - e*c2p) / f;
-
-    float c3 = c3p / f;
-    float c2 = (c2p - e*c3) / d;
-    float c1 = (c1p - b*c2 - c*c3) / a;
-
+    float c3 = c33/f;
+    float c2 = (c22-e*c3)/d;
+    float c1 = (c11-b*c2-c*c3)/a;
     return vec3(c1,c2,c3);
 }
 
