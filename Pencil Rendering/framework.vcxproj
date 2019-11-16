@@ -147,6 +147,8 @@
     <None Include="room.ply" />
     <None Include="shadow.frag" />
     <None Include="shadow.vert" />
+    <None Include="SkyDome.frag" />
+    <None Include="SkyDome.vert" />
     <None Include="textures\images.zip" />
   </ItemGroup>
   <ItemGroup>

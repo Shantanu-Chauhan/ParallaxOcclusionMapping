@@ -24,6 +24,7 @@ uniform vec3 diffuse;//Kd
 
 uniform vec3 specular;//Ks
 uniform float shininess;//alpha exponent
+uniform sampler2D TEXTURE;
 
 uniform int GBufferNum;
 
@@ -46,5 +47,6 @@ void main()
 	   
 	// store specular intensity in gAlbedoSpec's alpha component
 	gAlbedoSpec.a = shininess;
-	Diffuse=diffuse;
+	Diffuse= texture(TEXTURE,FragPos.xy).xyz;
+	Diffuse = diffuse;
 }  

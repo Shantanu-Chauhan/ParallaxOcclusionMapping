@@ -201,6 +201,7 @@ void Scene::InitializeScene()
 	AmbientLight = vec3(0.2, 0.2, 0.2);
 	CHECKERROR;
 	objectRoot = new Object(nullptr, nullId);
+	skydome = new Object(nullptr, nullId);
 	numberoflights = 2000;
 	numberOfRows = 50;
 	numberOfColumns = 40;
@@ -257,6 +258,13 @@ void Scene::InitializeScene()
 	AmbientProgram->AddShader("Ambient.frag", GL_FRAGMENT_SHADER);
 	glBindAttribLocation(AmbientProgram->programId, 0, "vertex");
 	AmbientProgram->LinkProgram();
+
+
+	SkyDomeProgram = new ShaderProgram();
+	SkyDomeProgram->AddShader("SkyDome.vert", GL_VERTEX_SHADER);
+	SkyDomeProgram->AddShader("SkyDome.frag", GL_FRAGMENT_SHADER);
+	glBindAttribLocation(SkyDomeProgram->programId, 0, "vertex");
+	SkyDomeProgram->LinkProgram();
 
 
 	LocalLightProgram = new ShaderProgram();
@@ -335,7 +343,7 @@ void Scene::InitializeScene()
 	objectRoot->add(room, Translate(basePoint.x, basePoint.y, basePoint.z));// REMOVE THIS FOR REFLECTIONS
 	objectRoot->add(sea);
 	objectRoot->add(central);
-	objectRoot->add(sky, Scale(2000.0, 2000.0, 2000.0));
+	skydome->add(sky, Scale(2000.0, 2000.0, 2000.0));
 	//localLights->add(sphere, Scale(2.0, 2.0, 2.0));
 
 
@@ -583,7 +591,7 @@ void Scene::DrawScene()
 	{
 		LightingProgram->Use();
 
-		glClear(GL_DEPTH_BUFFER_BIT);
+		//glClear(GL_DEPTH_BUFFER_BIT);
 		programId = LightingProgram->programId;
 		loc = glGetUniformLocation(programId, "ShadowMatrix");
 		glUniformMatrix4fv(loc, 1, GL_TRUE, ShadowMatrix.Pntr());
@@ -730,6 +738,38 @@ void Scene::DrawScene()
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 	//---------------------------------------------------     LOCAL LIGHTS PROGRAM
+
+	//--------------------------------------------------- SKY DOME PROGRAM
+	{
+		glDisable(GL_BLEND);
+		glDisable(GL_CULL_FACE);
+
+		// Copy depth contents from G-Buffer
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, Gbuffer.fboID);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);// write to default framebuffer
+		glBlitFramebuffer(0, 0,Gbuffer.width, Gbuffer.height,
+			0, 0, Gbuffer.width, Gbuffer.height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		glEnable(GL_DEPTH_TEST);
+		SkyDomeProgram->Use();
+		glViewport(0, 0, width, height);
+		glClearColor(0.5, 0.5, 0.5, 1.0);
+
+		programId = SkyDomeProgram->programId;
+
+		loc = glGetUniformLocation(programId, "WorldProj");
+		glUniformMatrix4fv(loc, 1, GL_TRUE, WorldProj.Pntr());
+		loc = glGetUniformLocation(programId, "WorldView");
+		glUniformMatrix4fv(loc, 1, GL_TRUE, WorldView.Pntr());
+		loc = glGetUniformLocation(programId, "WorldInverse");
+		glUniformMatrix4fv(loc, 1, GL_TRUE, WorldInverse.Pntr());
+		skydome->Draw(SkyDomeProgram, Identity);
+		SkyDomeProgram->Unuse();
+	}
+
+	//--------------------------------------------------- SKY DOME PROGRAM
+
 
 	animate(36);
 	const float end = glfwGetTime() / 1000.0f - start;

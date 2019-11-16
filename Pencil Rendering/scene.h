@@ -55,6 +55,7 @@ public:
 
 	// All objects in the scene are children of this single root object.
 	Object* objectRoot;
+	Object* skydome;
 	Object* localLights;
 	Object* FSQ;
 	std::vector<float> BlurFiler(int weight);
@@ -73,6 +74,7 @@ public:
 	ShaderProgram* LocalLightProgram;
 	ShaderProgram* computeShaderProgramVertical;
 	ShaderProgram* computeShaderProgramHorizontal;
+	ShaderProgram* SkyDomeProgram;
 
 	FBO shadow;
 	FBO Gbuffer;
