@@ -167,10 +167,10 @@ void Scene::InitializeScene()
 {
 	KernalSize = 2;
 	Filter = BlurFiler(KernalSize);
-	shadowWidth = 2048;
-	shadowHeight = 2048;
+	shadowWidth = 1024;
+	shadowHeight = 1024;
 	glBlendFunc(GL_ONE, GL_ONE);
-	localLightsToggle = true;
+	localLightsToggle = false;
 	globalLightToggle = true;
 	lightHeight = 1.0f;
 	GBufferNum = 0;

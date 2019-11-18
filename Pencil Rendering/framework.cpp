@@ -10,6 +10,8 @@
 #include<imgui_impl_glfw.h>
 #include<imgui_impl_opengl3.h>
 Scene scene;
+#define WIDTH 1920
+#define HEIGHT 1080
 
 ////////////////////////////////////////////////////////////////////////
 // Do the OpenGL/GLut setup and then enter the interactive loop.
@@ -29,7 +31,7 @@ int main(int argc, char** argv)
 	glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, 1);
 
-	window = glfwCreateWindow(1024, 720, "Deffered Shading", nullptr, nullptr);
+	window = glfwCreateWindow(WIDTH, HEIGHT, "Deffered Shading", nullptr, nullptr);
 	glfwMakeContextCurrent(window);
 	if (!window)	
 	{
@@ -46,8 +48,8 @@ int main(int argc, char** argv)
 	// Setup Dear ImGui style
 	ImGui::StyleColorsDark();
 
-	scene.width = 1024;
-	scene.height = 720;
+	scene.width = WIDTH;
+	scene.height = HEIGHT;
     printf("OpenGL Version: %s\n", glGetString(GL_VERSION));
     printf("GLSL Version: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
     printf("Rendered by: %s\n", glGetString(GL_RENDERER));
@@ -77,9 +79,6 @@ int main(int argc, char** argv)
 		ImGui::InputInt("Number of Local Lights", &number,100);
 		ImGui::InputInt("Number of Rows", &rows,5);
 		ImGui::InputInt("Number of Columns", &columns,5);
-		ImGui::InputFloat("Alpha", &scene.alpha,0.0001f,0.0001f);
-		ImGui::InputFloat("Maxdepth", &scene.maxdepth,100.0f, 1000.0f);
-		ImGui::InputInt("Number of Columns", &columns,5);
 		if(ImGui::Button("Apply", ImVec2(50.0f, 20.0f)))
 		{
 			scene.numberoflights = number;
@@ -89,11 +88,13 @@ int main(int argc, char** argv)
 			scene.CreateLights();
 		}
 		ImGui::InputInt("Kernal Size", &kernal);
-		if (ImGui::Button("Make new Kernal", ImVec2(50.0f, 20.0f)))
+		if (ImGui::Button("Make New Kernal", ImVec2(150.0f, 20.0f)))
 		{
 			scene.KernalSize = kernal;
 			scene.Filter = scene.BlurFiler(scene.KernalSize);
 		}
+		ImGui::InputFloat("Alpha", &scene.alpha,0.0001f,0.0001f);
+		ImGui::InputFloat("Maxdepth", &scene.maxdepth,100.0f, 1000.0f);
 		if (ImGui::BeginCombo("Select G - Buffer", label))
 		{
 			if (ImGui::Selectable("Lighting", selected))
