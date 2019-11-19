@@ -75,8 +75,8 @@ void Object::Draw(ShaderProgram* program, MAT4& objectTr,bool dontdraw)
 		loc = glGetUniformLocation(program->programId, "TEXTURE");
 		glUniform1i(loc, 5);
 		loc = glGetUniformLocation(program->programId, "diffuse");
-		glm::vec3 zero(0.0f);
-		glUniform3fv(loc, 1, &zero[0]);
+		/*glm::vec3 zero(0.0f);
+		glUniform3fv(loc, 1, &zero[0]);*/
 	}
 
 	if (NormalId > 0)

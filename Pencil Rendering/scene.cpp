@@ -31,7 +31,8 @@ using namespace glm;
 #include "texture.h"
 #include "transform.h"
 
-
+int DOMEWIDTH;
+int DOMEHEIGHT;
 const float PI = 3.14159f;
 const float rad = PI / 180.0f;    // Convert degrees to radians
 
@@ -79,17 +80,23 @@ vec3 HSV2RGB(const float h, const float s, const float v)
 Object* SphereOfSpheres(Shape* SpherePolygons)
 {
 	Object* ob = new Object(NULL, nullId);
-
+	float shiny = 0.0f;
 	for (float angle = 0.0; angle < 360.0; angle += 18.0)
+	{
 		for (float row = 0.075; row < PI / 2.0; row += PI / 2.0 / 6.0) {
 			vec3 hue = HSV2RGB(angle / 360.0, 1.0f - 2.0f * row / PI, 1.0f);
 
 			Object* sp = new Object(SpherePolygons, spheresId,
-				hue, vec3(1.0, 1.0, 1.0), 120.0);
+				hue, vec3(1.0, 1.0, 1.0), shiny);
 			float s = sin(row);
 			float c = cos(row);
 			ob->add(sp, Rotate(2, angle) * Translate(c, 0, s) * Scale(0.075 * c, 0.075 * c, 0.075 * c));
 		}
+		if (angle < 280.0f)
+			shiny += 300.0f;
+		else
+			shiny += 300000.0f;
+	}
 	return ob;
 }
 
@@ -165,6 +172,29 @@ void Scene::CreateLights()
 }
 void Scene::InitializeScene()
 {
+	block.Num = 30.0f;
+
+	int kk = 0;
+	int pos = 0;
+	for (int k = 0; k < block.Num; ++k)
+	{
+		float p = 0.5f;
+		float u = 0.0f;
+		for (kk = k; kk; p *= 0.5f)
+		{
+			if (kk & 1)
+			{
+				u += p;
+			}
+			kk = kk >> 1;
+		}
+		float v = (k + 0.5f) / block.Num;
+		block.hammersley[pos++] = u;
+		block.hammersley[pos++] = v;
+	}
+
+
+
 	exposure = 1.0f;
 	contrast = 1.0f;
 	KernalSize = 2;
@@ -190,7 +220,7 @@ void Scene::InitializeScene()
 	zoom = 150.0f;
 	ry = 0.2f;
 	front = 0.1f;
-	back = 1000.0;
+	back = 100000.0;
 	eye = vec3(0.0f, -10.0f, 0.0f);
 	time_since_last_refresh = 0.0f;
 	eyee = true;
@@ -288,7 +318,7 @@ void Scene::InitializeScene()
 	// Various colors used in the subsequent models
 	vec3 woodColor(87.0 / 255.0, 51.0 / 255.0, 35.0 / 255.0);
 	vec3 brickColor(134.0 / 255.0, 60.0 / 255.0, 56.0 / 255.0);
-	vec3 brassColor(0.5, 0.5, 0.1);
+	vec3 brassColor(0.5, 0.5, 0.5);
 	vec3 grassColor(62.0 / 255.0, 102.0 / 255.0, 38.0 / 255.0);
 	vec3 waterColor(0.3, 0.3, 1.0);
 
@@ -299,7 +329,7 @@ void Scene::InitializeScene()
 	Object* central = new Object(NULL, nullId);
 	Object* anim = new Object(NULL, nullId);
 	Object* room = new Object(RoomPolygons, roomId, brickColor, vec3(0.0, 0.0, 0.0), 1);
-	Object* teapot = new Object(TeapotPolygons, teapotId, brassColor, vec3(0.5, 0.5, 0.5), 120);
+	Object* teapot = new Object(TeapotPolygons, teapotId, brassColor, vec3(0.5, 0.5, 0.5), 500000);
 	Object* podium = new Object(BoxPolygons, boxId, vec3(woodColor), vec3(0.5, 0.5, 0.5), 10);
 	Object* sky = new Object(SpherePolygons, skyId, vec3(), vec3(), 0);
 	Object* ground = new Object(GroundPolygons, groundId, grassColor, vec3(0.0, 0.0, 0.0), 1);
@@ -315,20 +345,22 @@ void Scene::InitializeScene()
 
 	// FIXME: This is where you could read in all the textures and
 	// associate them with the various objects just created above.
-	Texture* skyDome = new Texture("textures/Ocean.hdr");
+	skyDome = new Texture("textures/Newport_Loft_Ref.hdr");
+	DOMEHEIGHT = skyDome->mHeight;
+	DOMEWIDTH = skyDome->mWidth;
 	sky->TextureId = skyDome->textureId;
 	
-	irridianceMap = new Texture("textures/irridianceMap.hdr");
+	irridianceMap = new Texture("textures/Newport_Loft_Ref.irr.hdr");
 	
 	
-	//Texture* seaText = new Texture("textures/Ocean.hdr");
+	Texture* seaText = new Texture("textures/Ocean.hdr");
 	
 	Texture* seaNormal = new Texture("textures/ripples_normalmap.png");
 	//sea->TextureId = seaText->textureId;
 	sea->NormalId = seaNormal->textureId;
 
-	Texture* teaPot = new Texture("textures/cracks.png");
-	teapot->TextureId = teaPot->textureId;
+	//Texture* teaPot = new Texture("textures/cracks.png");
+	//teapot->TextureId = teaPot->textureId;
 
 	Texture* box = new Texture("textures/box.png");
 	Texture* boxNormal = new Texture("textures/Brazilian_rosewood_pxr128_normal.png");
@@ -351,7 +383,7 @@ void Scene::InitializeScene()
 	objectRoot->add(room, Translate(basePoint.x, basePoint.y, basePoint.z));// REMOVE THIS FOR REFLECTIONS
 	objectRoot->add(sea);
 	objectRoot->add(central);
-	skydome->add(sky, Scale(2000.0, 2000.0, 2000.0));
+	skydome->add(sky, Scale(50000.0, 50000.0, 50000.0));
 	//localLights->add(sphere, Scale(2.0, 2.0, 2.0));
 
 
@@ -361,7 +393,7 @@ void Scene::InitializeScene()
 	// Central contains a teapot on a podium and an external sphere of spheres
 	central->add(podium, Translate(0.0, 0, 0));
 	central->add(anim, Translate(0.0, 0, 0));
-	anim->add(teapot, Translate(0.1, 0.0, 1.5) * TeapotPolygons->modelTr);
+	anim->add(teapot, Translate(0.1, 0.0, 1.5) * TeapotPolygons->modelTr * Scale(30.0,30.0,30.0));
 	anim->add(spheres, Translate(0.0, 0.0, 0.0) * Scale(30.0, 30.0, 30.0));
 
 	// Room contains two framed pictures
@@ -372,7 +404,12 @@ void Scene::InitializeScene()
 	Gbuffer.CreateG(width, height);
 	InterBlur.CreateFBO(shadowWidth, shadowHeight);
 	FinalBlur.CreateFBO(shadowWidth, shadowHeight);
+	glGenBuffers(1, &IBLBlockID);
 	glGenBuffers(1, &blockID); // Generates block
+	unsigned int bindPoint = 3;
+
+	glBindBufferBase(GL_UNIFORM_BUFFER, bindPoint, IBLBlockID);
+	glBufferData(GL_UNIFORM_BUFFER, sizeof(block), &block, GL_STATIC_DRAW);
 	CHECKERROR;
 }
 
@@ -441,7 +478,6 @@ void Scene::DrawScene()
 	Gbuffer.Bind();
 
 	glViewport(0, 0, width, height);
-	glClearColor(0.5, 0.5, 0.5, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	int programId = GbufferProgram->programId;
@@ -463,45 +499,95 @@ void Scene::DrawScene()
 	//---------------------------------------------------      GBUFFER PROGRAM
 
 	//---------------------------------------------------      AMBIENT PROGRAM
-	//if(GBufferNum == 0){
-	//	AmbientProgram->Use();
-	//	programId = AmbientProgram->programId;
+	if(GBufferNum == 0)
+	{
+		AmbientProgram->Use();
+		programId = AmbientProgram->programId;
 
-	//	loc = glGetUniformLocation(programId, "Ambient");
-	//	glUniform3fv(loc, 1, &(AmbientLight[0]));
+		loc = glGetUniformLocation(programId, "Ambient");
+		glUniform3fv(loc, 1, &(AmbientLight[0]));
 
-	//	glActiveTexture(GL_TEXTURE0);
-	//	glBindTexture(GL_TEXTURE_2D, Gbuffer.Diffuse);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, Gbuffer.Diffuse);
 
-	//	glActiveTexture(GL_TEXTURE1);
-	//	glBindTexture(GL_TEXTURE_2D, irridianceMap->textureId);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, irridianceMap->textureId);
 
-	//	glActiveTexture(GL_TEXTURE2);
-	//	glBindTexture(GL_TEXTURE_2D, Gbuffer.gNormal);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, Gbuffer.gNormal);
 
-	//	loc = glGetUniformLocation(programId, "Diffuse");
-	//	glUniform1i(loc, 0);
 
-	//	loc = glGetUniformLocation(programId, "width");
-	//	glUniform1f(loc, width);
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, Gbuffer.gAlbedoSpec);
 
-	//	loc = glGetUniformLocation(programId, "height");
-	//	glUniform1f(loc, height);
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_2D, Gbuffer.gPosition);
+		
+		glActiveTexture(GL_TEXTURE5);
+		glBindTexture(GL_TEXTURE_2D, skyDome->textureId);
 
-	//	CHECKERROR;
+		loc = glGetUniformLocation(programId, "Diffuse");
+		glUniform1i(loc, 0);
 
-	//	FSQ->Draw(AmbientProgram, Identity);
 
-	//	CHECKERROR;
-	//	AmbientProgram->Unuse();
-	//	glActiveTexture(GL_TEXTURE0);
-	//	glBindTexture(GL_TEXTURE_2D, 0);
-	//	glActiveTexture(GL_TEXTURE1);
-	//	glBindTexture(GL_TEXTURE_2D, 0);
-	//	glActiveTexture(GL_TEXTURE2);
-	//	glBindTexture(GL_TEXTURE_2D, 0);
-	//	//---------------------------------------------------     AMBIENT PROGRAM
-	//}
+		loc = glGetUniformLocation(programId, "irridianceMap");
+		glUniform1i(loc, 1);
+
+		loc = glGetUniformLocation(programId, "Normal");
+		glUniform1i(loc, 2);
+
+		loc = glGetUniformLocation(programId, "gAlbedoSpec");
+		glUniform1i(loc, 3);
+
+		loc = glGetUniformLocation(programId, "gPosition");
+		glUniform1i(loc, 4);
+
+		loc = glGetUniformLocation(programId, "skyDome");
+		glUniform1i(loc, 5);
+		
+		loc = glGetUniformLocation(programId, "width");
+		glUniform1f(loc, width);
+
+		loc = glGetUniformLocation(programId, "height");
+		glUniform1f(loc, height);
+
+		loc = glGetUniformLocation(programId, "mapWidth");
+		glUniform1f(loc, DOMEWIDTH);
+
+		loc = glGetUniformLocation(programId, "mapHeight");
+		glUniform1f(loc, DOMEHEIGHT);
+
+		loc = glGetUniformLocation(programId, "contrast");
+		glUniform1f(loc, contrast);
+		loc = glGetUniformLocation(programId, "exposure");
+		glUniform1f(loc, exposure);
+
+		loc = glGetUniformLocation(programId, "WorldInverse");
+		glUniformMatrix4fv(loc, 1, GL_TRUE, WorldInverse.Pntr());
+
+		loc = glGetUniformBlockIndex(programId, "HammersleyBlock");
+		glUniformBlockBinding(programId, loc, 3);
+
+		CHECKERROR;
+
+		FSQ->Draw(AmbientProgram, Identity);
+
+		CHECKERROR;
+		AmbientProgram->Unuse();
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glActiveTexture(GL_TEXTURE5);
+		glBindTexture(GL_TEXTURE_2D, 0);
+		//---------------------------------------------------     AMBIENT PROGRAM
+	}
 
 	//---------------------------------------------------     SHADOW PROGRAM
 
@@ -517,7 +603,6 @@ void Scene::DrawScene()
 	shadowProgram->Use();
 	shadow.Bind();
 	glViewport(0, 0, shadow.width, shadow.height);
-	glClearColor(0.5, 0.5, 0.5, 1.0);
 	glClear(GL_DEPTH_BUFFER_BIT);
 	programId = shadowProgram->programId;
 
@@ -545,6 +630,7 @@ void Scene::DrawScene()
 
 	
 	{
+
 		//InterBlur.Bind();
 		computeShaderProgramHorizontal->Use();
 		programId = computeShaderProgramHorizontal->programId;
@@ -572,10 +658,11 @@ void Scene::DrawScene()
 
 	//	////---------------------------------------------------     Vertical SHADOW BLUR
 	{
+
 		//FinalBlur.Bind();
 		computeShaderProgramVertical->Use();
 		programId = computeShaderProgramVertical->programId;
-		int bindpoint = 0; // Start at zero, increment for other blocks
+		int bindpoint = 1; // Start at zero, increment for other blocks
 		loc = glGetUniformBlockIndex(programId, "blurKernel");
 		glUniformBlockBinding(programId, loc, bindpoint);
 		glBindBufferBase(GL_UNIFORM_BUFFER, bindpoint, blockID);
@@ -773,7 +860,7 @@ void Scene::DrawScene()
 		glEnable(GL_DEPTH_TEST);
 		SkyDomeProgram->Use();
 		glViewport(0, 0, width, height);
-		glClearColor(0.5, 0.5, 0.5, 1.0);
+
 
 		programId = SkyDomeProgram->programId;
 

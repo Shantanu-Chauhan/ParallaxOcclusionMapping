@@ -33,9 +33,15 @@ enum ObjectIds {
 
 class Shader;
 
+struct hammer {
+	float Num = 20;
+	float hammersley[40] = { 0.0f }; // [2*N]
+};
 class Scene
 {
 public:
+	Texture* skyDome;
+	hammer block;
 	// Viewing transformation parameters (suggested) FIXME: This is a
 	// good place for the transformation values which are set by the
 	// user mouse/keyboard actions and used in DrawScene to create the
@@ -85,6 +91,7 @@ public:
 	void DrawScene();
 
 	unsigned int blockID;
+	unsigned int IBLBlockID;
 	int GBufferNum;
 	void CreateLights();
 	//Variables

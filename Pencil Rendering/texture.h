@@ -17,6 +17,7 @@ class Texture
 {
  public:
     unsigned int textureId;
+	int mWidth, mHeight;
     Texture(const std::string &filename);
     Texture(int width, int height);
 

@@ -24,7 +24,7 @@ Texture::Texture(const std::string &path) : textureId(0)
    
 	if (path.substr(path.find_last_of(".")) == ".hdr")
 	{
-		float* data = stbi_loadf(path.c_str(), &width, &height, &n, 0);
+		float* data = stbi_loadf(path.c_str(), &mWidth, &mHeight, &n, 0);
 
 		if (!data)
 		{
@@ -39,7 +39,7 @@ Texture::Texture(const std::string &path) : textureId(0)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width, height, 0, GL_RGB, GL_FLOAT, data);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, mWidth, mHeight, 0, GL_RGB, GL_FLOAT, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 
 		glBindTexture(GL_TEXTURE_2D, 0);

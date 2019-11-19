@@ -49,6 +49,6 @@ void main()
 	   
 	// store specular intensity in gAlbedoSpec's alpha component
 	gAlbedoSpec.a = shininess;
-	//Diffuse= texture(TEXTURE,texCoord).xyz + diffuse;
-	Diffuse = diffuse;
+	Diffuse= texture(TEXTURE,texCoord).xyz + diffuse;
+	//Diffuse = diffuse;
 }  
