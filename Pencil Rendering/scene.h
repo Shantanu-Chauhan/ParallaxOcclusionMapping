@@ -46,7 +46,7 @@ public:
 
 	// Light position parameters
 	float lightSpin, lightTilt, lightDist;
-
+	Texture* irridianceMap;
 	vec3 basePoint;  // Records where the scene building is centered.
 	int mode; // Extra mode indicator hooked up to number keys and sent to shader
 
@@ -115,4 +115,6 @@ public:
 	int numberOfColumns;
 	float lightHeight;
 	int shadowWidth, shadowHeight;
+	float contrast;
+	float exposure;
 };

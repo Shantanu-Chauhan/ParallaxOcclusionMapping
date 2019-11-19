@@ -74,6 +74,9 @@ void Object::Draw(ShaderProgram* program, MAT4& objectTr,bool dontdraw)
 		glBindTexture(GL_TEXTURE_2D, TextureId);
 		loc = glGetUniformLocation(program->programId, "TEXTURE");
 		glUniform1i(loc, 5);
+		loc = glGetUniformLocation(program->programId, "diffuse");
+		glm::vec3 zero(0.0f);
+		glUniform3fv(loc, 1, &zero[0]);
 	}
 
 	if (NormalId > 0)
@@ -94,7 +97,11 @@ void Object::Draw(ShaderProgram* program, MAT4& objectTr,bool dontdraw)
 	}
     CHECKERROR;
 
-
+	if (TextureId > 0)
+	{
+		glActiveTexture((GLenum)((int)GL_TEXTURE0 + 5));
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
     // Recursively draw each sub-objects, each with its own transformation.
     for (int i=0;  i<instances.size();  i++) {
         MAT4 itr = objectTr*instances[i].second*animTr;

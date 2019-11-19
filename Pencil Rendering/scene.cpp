@@ -165,6 +165,8 @@ void Scene::CreateLights()
 }
 void Scene::InitializeScene()
 {
+	exposure = 1.0f;
+	contrast = 1.0f;
 	KernalSize = 2;
 	Filter = BlurFiler(KernalSize);
 	shadowWidth = 1024;
@@ -251,6 +253,7 @@ void Scene::InitializeScene()
 	GbufferProgram->AddShader("Gbuffer.frag", GL_FRAGMENT_SHADER);
 	glBindAttribLocation(GbufferProgram->programId, 0, "vertex");
 	glBindAttribLocation(GbufferProgram->programId, 1, "vertexNormal");
+	glBindAttribLocation(GbufferProgram->programId, 2, "vertexTexture");
 	GbufferProgram->LinkProgram();
 
 	AmbientProgram = new ShaderProgram();
@@ -280,7 +283,7 @@ void Scene::InitializeScene()
 	Shape* RoomPolygons = new Ply("room.ply");
 	Shape* GroundPolygons = ground;
 	Shape* QuadPolygons = new Quad();
-	Shape* SeaPolygons = new Plane(2000.0, 50);
+	Shape* SeaPolygons = new Plane(100.0, 50);
 
 	// Various colors used in the subsequent models
 	vec3 woodColor(87.0 / 255.0, 51.0 / 255.0, 35.0 / 255.0);
@@ -312,11 +315,16 @@ void Scene::InitializeScene()
 
 	// FIXME: This is where you could read in all the textures and
 	// associate them with the various objects just created above.
-	Texture* skyDome = new Texture("textures/Ocean.png");
+	Texture* skyDome = new Texture("textures/Ocean.hdr");
 	sky->TextureId = skyDome->textureId;
-
+	
+	irridianceMap = new Texture("textures/irridianceMap.hdr");
+	
+	
+	//Texture* seaText = new Texture("textures/Ocean.hdr");
+	
 	Texture* seaNormal = new Texture("textures/ripples_normalmap.png");
-	sea->TextureId = skyDome->textureId;
+	//sea->TextureId = seaText->textureId;
 	sea->NormalId = seaNormal->textureId;
 
 	Texture* teaPot = new Texture("textures/cracks.png");
@@ -455,35 +463,45 @@ void Scene::DrawScene()
 	//---------------------------------------------------      GBUFFER PROGRAM
 
 	//---------------------------------------------------      AMBIENT PROGRAM
-	if(GBufferNum == 0){
-		AmbientProgram->Use();
-		programId = AmbientProgram->programId;
+	//if(GBufferNum == 0){
+	//	AmbientProgram->Use();
+	//	programId = AmbientProgram->programId;
 
-		loc = glGetUniformLocation(programId, "Ambient");
-		glUniform3fv(loc, 1, &(AmbientLight[0]));
+	//	loc = glGetUniformLocation(programId, "Ambient");
+	//	glUniform3fv(loc, 1, &(AmbientLight[0]));
 
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, Gbuffer.Diffuse);
+	//	glActiveTexture(GL_TEXTURE0);
+	//	glBindTexture(GL_TEXTURE_2D, Gbuffer.Diffuse);
 
-		loc = glGetUniformLocation(programId, "Diffuse");
-		glUniform1i(loc, 0);
+	//	glActiveTexture(GL_TEXTURE1);
+	//	glBindTexture(GL_TEXTURE_2D, irridianceMap->textureId);
 
-		loc = glGetUniformLocation(programId, "width");
-		glUniform1f(loc, width);
+	//	glActiveTexture(GL_TEXTURE2);
+	//	glBindTexture(GL_TEXTURE_2D, Gbuffer.gNormal);
 
-		loc = glGetUniformLocation(programId, "height");
-		glUniform1f(loc, height);
+	//	loc = glGetUniformLocation(programId, "Diffuse");
+	//	glUniform1i(loc, 0);
 
-		CHECKERROR;
+	//	loc = glGetUniformLocation(programId, "width");
+	//	glUniform1f(loc, width);
 
-		FSQ->Draw(AmbientProgram, Identity);
+	//	loc = glGetUniformLocation(programId, "height");
+	//	glUniform1f(loc, height);
 
-		CHECKERROR;
-		AmbientProgram->Unuse();
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, 0);
-		//---------------------------------------------------     AMBIENT PROGRAM
-	}
+	//	CHECKERROR;
+
+	//	FSQ->Draw(AmbientProgram, Identity);
+
+	//	CHECKERROR;
+	//	AmbientProgram->Unuse();
+	//	glActiveTexture(GL_TEXTURE0);
+	//	glBindTexture(GL_TEXTURE_2D, 0);
+	//	glActiveTexture(GL_TEXTURE1);
+	//	glBindTexture(GL_TEXTURE_2D, 0);
+	//	glActiveTexture(GL_TEXTURE2);
+	//	glBindTexture(GL_TEXTURE_2D, 0);
+	//	//---------------------------------------------------     AMBIENT PROGRAM
+	//}
 
 	//---------------------------------------------------     SHADOW PROGRAM
 
@@ -650,11 +668,12 @@ void Scene::DrawScene()
 
 		LightingProgram->Unuse();
 
+		glActiveTexture(GL_TEXTURE0); // Activate texture unit 2
+		glBindTexture(GL_TEXTURE_2D, 0); // Load texture into it
+		
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, 0);
 
-		glActiveTexture(GL_TEXTURE0); // Activate texture unit 2
-		glBindTexture(GL_TEXTURE_2D, 0); // Load texture into it
 
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, 0);
@@ -764,6 +783,10 @@ void Scene::DrawScene()
 		glUniformMatrix4fv(loc, 1, GL_TRUE, WorldView.Pntr());
 		loc = glGetUniformLocation(programId, "WorldInverse");
 		glUniformMatrix4fv(loc, 1, GL_TRUE, WorldInverse.Pntr());
+		loc = glGetUniformLocation(programId, "contrast");
+		glUniform1f(loc, contrast);
+		loc = glGetUniformLocation(programId, "exposure");
+		glUniform1f(loc, exposure);
 		skydome->Draw(SkyDomeProgram, Identity);
 		SkyDomeProgram->Unuse();
 	}

@@ -22,7 +22,9 @@ out vec4 FragColor;
 uniform int objectId;
 uniform vec3 diffuse;//Kd
 
+
 uniform vec3 specular;//Ks
+in vec2 texCoord;//texcoord
 uniform float shininess;//alpha exponent
 uniform sampler2D TEXTURE;
 
@@ -47,6 +49,6 @@ void main()
 	   
 	// store specular intensity in gAlbedoSpec's alpha component
 	gAlbedoSpec.a = shininess;
-	Diffuse= texture(TEXTURE,FragPos.xy).xyz;
+	//Diffuse= texture(TEXTURE,texCoord).xyz + diffuse;
 	Diffuse = diffuse;
 }  

@@ -18,6 +18,8 @@ const int     spheresId	= 10;
 
 uniform int objectId;
 uniform sampler2D TEXTURE;
+uniform float exposure;
+uniform float contrast;
 in vec3 eyeVec;
 out vec4 FragColor;
 
@@ -27,6 +29,7 @@ void main()
 	vec3 V= normalize(eyeVec);
 	vec2 uv;
 	uv=vec2(1/2 - atan(V.y,V.x)/(2*3.14), acos(V.z)/3.14);
-	FragColor.xyz =  texture(TEXTURE, uv).xyz;
-	//FragColor.xyz =  vec3(1.0,0.0,0.0);
+	vec3 color = texture(TEXTURE, uv).xyz;
+	vec3 inter = pow(  exposure*color / ( exposure * color + vec3(1.0,1.0,1.0) ) , vec3(contrast/2.2)  );
+	FragColor.xyz =  inter;
 }  

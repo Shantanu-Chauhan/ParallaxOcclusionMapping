@@ -8,7 +8,7 @@
 #include "math.h"
 #include <fstream>
 #include <stdlib.h>
-
+#include<iostream>
 #include "texture.h"
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -21,11 +21,40 @@ Texture::Texture(const std::string &path) : textureId(0)
 {
     stbi_set_flip_vertically_on_load(true);
     int width, height, n;
-    unsigned char* image = stbi_load(path.c_str(), &width, &height, &n, 4);
-    if (!image) {
-        printf("\nRead error on file %s:\n  %s\n\n", path.c_str(), stbi_failure_reason());
-        exit(-1); }
+   
+	if (path.substr(path.find_last_of(".")) == ".hdr")
+	{
+		float* data = stbi_loadf(path.c_str(), &width, &height, &n, 0);
 
+		if (!data)
+		{
+			std::cout << "[Texture] HDR Texture {0} could not be loaded" << path.c_str() << std::endl;
+		}
+
+		glGenTextures(1, &textureId);
+		glBindTexture(GL_TEXTURE_2D, textureId);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width, height, 0, GL_RGB, GL_FLOAT, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		if (data)
+		{
+			stbi_image_free(data);
+		}
+		return;
+	}
+    unsigned char* image = stbi_load(path.c_str(), &width, &height, &n, 4);
+	if (!image) {
+		printf("\nRead error on file %s:\n  %s\n\n", path.c_str(), stbi_failure_reason());
+		exit(-1);
+	}
     // Here we create MIPMAP and set some useful modes for the texture
     glGenTextures(1, &textureId);   // Get an integer id for thi texture from OpenGL
     glBindTexture(GL_TEXTURE_2D, textureId);
