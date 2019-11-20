@@ -30,6 +30,6 @@ void main()
 	vec2 uv;
 	uv=vec2(1/2 - atan(V.y,V.x)/(2*3.14), acos(V.z)/3.14);
 	vec3 color = texture(TEXTURE, uv).xyz;
-	vec3 inter = pow(  exposure*color / ( exposure * color + vec3(1.0,1.0,1.0) ) , vec3(contrast/2.2)  );
-	FragColor.xyz =  inter;
+	color = pow(  exposure*color / ( exposure * color + vec3(1.0,1.0,1.0) ) , vec3(contrast/2.2)  );
+	FragColor =  vec4(color,1.0);
 }  

@@ -31,8 +31,6 @@ using namespace glm;
 #include "texture.h"
 #include "transform.h"
 
-int DOMEWIDTH;
-int DOMEHEIGHT;
 const float PI = 3.14159f;
 const float rad = PI / 180.0f;    // Convert degrees to radians
 
@@ -80,14 +78,15 @@ vec3 HSV2RGB(const float h, const float s, const float v)
 Object* SphereOfSpheres(Shape* SpherePolygons)
 {
 	Object* ob = new Object(NULL, nullId);
-	float shiny = 0.0f;
+	float shiny = 10.0f;
+	float spec = 1.0f;
 	for (float angle = 0.0; angle < 360.0; angle += 18.0)
 	{
 		for (float row = 0.075; row < PI / 2.0; row += PI / 2.0 / 6.0) {
 			vec3 hue = HSV2RGB(angle / 360.0, 1.0f - 2.0f * row / PI, 1.0f);
 
 			Object* sp = new Object(SpherePolygons, spheresId,
-				hue, vec3(1.0, 1.0, 1.0), shiny);
+				hue, vec3(0.05 * spec, 0.05 * spec, 0.05* spec), shiny);
 			float s = sin(row);
 			float c = cos(row);
 			ob->add(sp, Rotate(2, angle) * Translate(c, 0, s) * Scale(0.075 * c, 0.075 * c, 0.075 * c));
@@ -96,6 +95,7 @@ Object* SphereOfSpheres(Shape* SpherePolygons)
 			shiny += 300.0f;
 		else
 			shiny += 300000.0f;
+		spec *= 1.1;
 	}
 	return ob;
 }
@@ -172,7 +172,7 @@ void Scene::CreateLights()
 }
 void Scene::InitializeScene()
 {
-	block.Num = 30.0f;
+	block.Num = 40.0f;
 
 	int kk = 0;
 	int pos = 0;
@@ -195,8 +195,8 @@ void Scene::InitializeScene()
 
 
 
-	exposure = 1.0f;
-	contrast = 1.0f;
+	exposure = 7.6f;
+	contrast = 1.7f;
 	KernalSize = 2;
 	Filter = BlurFiler(KernalSize);
 	shadowWidth = 1024;
@@ -218,7 +218,7 @@ void Scene::InitializeScene()
 	tx = 0.0f;
 	ty = 0.0f;
 	zoom = 150.0f;
-	ry = 0.2f;
+	ry = 0.4f;
 	front = 0.1f;
 	back = 100000.0;
 	eye = vec3(0.0f, -10.0f, 0.0f);
@@ -329,11 +329,11 @@ void Scene::InitializeScene()
 	Object* central = new Object(NULL, nullId);
 	Object* anim = new Object(NULL, nullId);
 	Object* room = new Object(RoomPolygons, roomId, brickColor, vec3(0.0, 0.0, 0.0), 1);
-	Object* teapot = new Object(TeapotPolygons, teapotId, brassColor, vec3(0.5, 0.5, 0.5), 500000);
+	Object* teapot = new Object(TeapotPolygons, teapotId, brassColor, vec3(0.5, 0.5, 0.5), 5000);
 	Object* podium = new Object(BoxPolygons, boxId, vec3(woodColor), vec3(0.5, 0.5, 0.5), 10);
 	Object* sky = new Object(SpherePolygons, skyId, vec3(), vec3(), 0);
 	Object* ground = new Object(GroundPolygons, groundId, grassColor, vec3(0.0, 0.0, 0.0), 1);
-	Object* sea = new Object(SeaPolygons, seaId, waterColor, vec3(0.1, 0.1, 0.1), 120);
+	Object* sea = new Object(SeaPolygons, seaId, waterColor, vec3(0.01, 0.01, 0.01), 5000);
 	Object* spheres = SphereOfSpheres(SpherePolygons);
 	Object* leftFrame = FramedPicture(Identity, lPicId, BoxPolygons, QuadPolygons);
 	Object* rightFrame = FramedPicture(Identity, rPicId, BoxPolygons, QuadPolygons);
@@ -346,21 +346,19 @@ void Scene::InitializeScene()
 	// FIXME: This is where you could read in all the textures and
 	// associate them with the various objects just created above.
 	skyDome = new Texture("textures/Newport_Loft_Ref.hdr");
-	DOMEHEIGHT = skyDome->mHeight;
-	DOMEWIDTH = skyDome->mWidth;
 	sky->TextureId = skyDome->textureId;
 	
 	irridianceMap = new Texture("textures/Newport_Loft_Ref.irr.hdr");
 	
 	
-	Texture* seaText = new Texture("textures/Ocean.hdr");
+	Texture* seaText = new Texture("textures/Newport_Loft_Ref.hdr");
 	
 	Texture* seaNormal = new Texture("textures/ripples_normalmap.png");
-	//sea->TextureId = seaText->textureId;
+	sea->TextureId = seaText->textureId;
 	sea->NormalId = seaNormal->textureId;
 
-	//Texture* teaPot = new Texture("textures/cracks.png");
-	//teapot->TextureId = teaPot->textureId;
+	Texture* teaPot = new Texture("textures/cracks.png");
+	teapot->TextureId = teaPot->textureId;
 
 	Texture* box = new Texture("textures/box.png");
 	Texture* boxNormal = new Texture("textures/Brazilian_rosewood_pxr128_normal.png");
@@ -383,7 +381,7 @@ void Scene::InitializeScene()
 	objectRoot->add(room, Translate(basePoint.x, basePoint.y, basePoint.z));// REMOVE THIS FOR REFLECTIONS
 	objectRoot->add(sea);
 	objectRoot->add(central);
-	skydome->add(sky, Scale(50000.0, 50000.0, 50000.0));
+	skydome->add(sky, Scale(2050.0, 2050.0, 2050.0));
 	//localLights->add(sphere, Scale(2.0, 2.0, 2.0));
 
 
@@ -488,6 +486,8 @@ void Scene::DrawScene()
 	glUniformMatrix4fv(loc, 1, GL_TRUE, WorldView.Pntr());
 	loc = glGetUniformLocation(programId, "GBufferNum");
 	glUniform1i(loc, GBufferNum);
+	loc = glGetUniformLocation(programId, "WorldInverse");
+	glUniformMatrix4fv(loc, 1, GL_TRUE, WorldInverse.Pntr());
 	objectRoot->Draw(GbufferProgram, Identity);
 
 	Gbuffer.Unbind();
@@ -550,12 +550,6 @@ void Scene::DrawScene()
 
 		loc = glGetUniformLocation(programId, "height");
 		glUniform1f(loc, height);
-
-		loc = glGetUniformLocation(programId, "mapWidth");
-		glUniform1f(loc, DOMEWIDTH);
-
-		loc = glGetUniformLocation(programId, "mapHeight");
-		glUniform1f(loc, DOMEHEIGHT);
 
 		loc = glGetUniformLocation(programId, "contrast");
 		glUniform1f(loc, contrast);
@@ -847,6 +841,7 @@ void Scene::DrawScene()
 
 	//--------------------------------------------------- SKY DOME PROGRAM
 	{
+		glViewport(0, 0, width, height);
 		glDisable(GL_BLEND);
 		glDisable(GL_CULL_FACE);
 
@@ -859,7 +854,6 @@ void Scene::DrawScene()
 
 		glEnable(GL_DEPTH_TEST);
 		SkyDomeProgram->Use();
-		glViewport(0, 0, width, height);
 
 
 		programId = SkyDomeProgram->programId;

@@ -22,8 +22,6 @@ uniform vec3 Ambient;
 uniform vec3 view;
 uniform float width;
 uniform float height;
-uniform float mapWidth;
-uniform float mapHeight;
 out vec4 FragColor;
 uniform sampler2D Diffuse;
 uniform sampler2D gPosition;
@@ -38,7 +36,7 @@ uniform float contrast;
 
 uniform HammersleyBlock {
  float Num;
- float hammersley[2*100]; };
+ float hammersley[100]; };
 
 
 vec3 irridiance(vec3 normal)
@@ -52,7 +50,7 @@ vec3 irridiance(vec3 normal)
 
 vec3 Specular(vec3 N,vec3 V , vec3 Ks , float alpha)
 {	
-	vec3 R = ( 2.0*(max(dot(N, V), 0.0) )*N) - V;
+	vec3 R = ( 2.0*(dot(N, V))*N) - V;
 	vec3 A = normalize(vec3(-R.y, R.x, 0.0));
 	vec3 B = normalize(cross(R, A));
 
@@ -64,7 +62,7 @@ vec3 Specular(vec3 N,vec3 V , vec3 Ks , float alpha)
 	HEIGHT= skydomesize.y;
 
 	vec3 specular = vec3(0.0, 0.0, 0.0);
-	for(int i = 0; i < Num*2; i += 2)
+	for(int i = 0; i < int(Num)*2; i += 2)
 	{
 		float u = hammersley[i];
 		float v = acos(pow(hammersley[i+1], ( 1.0/ (alpha + 1.0) ) ) ) /3.14;
@@ -75,6 +73,7 @@ vec3 Specular(vec3 N,vec3 V , vec3 Ks , float alpha)
 
 		vec3 H = normalize(wk+V);
 		float NH = max(dot(N,H),0.0);
+		//float NH =dot(N,H);
 
 		float DH = (alpha + 2.0)*pow(NH,alpha) / (2 * 3.14);
 		float level = 0.5*log2((WIDTH*HEIGHT) / Num) - 0.5*log2(DH);
@@ -84,11 +83,12 @@ vec3 Specular(vec3 N,vec3 V , vec3 Ks , float alpha)
 	
 		float G;
 		vec3 F;
-		float LH = max(dot(L,H),0.0);
-		//G = 1/pow(LH,2);
-		G = 1.0;
-		F = Ks + (1-Ks) * pow(1-LH,5);
-		specular += (1.0/Num) * G * F /4.0 * Liwk * max(dot(N, wk), 0.0);
+		float WH = max(dot(wk,H),0.0);
+		//float WH = dot(wk,H);
+		G = 1.0/pow(WH,2);
+		//G = 1.0;
+		F = Ks + (1-Ks) * pow(1-WH,5);
+		specular += (1.0/Num) * G * (F /4.0) * Liwk * max(dot(N, wk), 0.0);
 	}
 	return specular;
 }

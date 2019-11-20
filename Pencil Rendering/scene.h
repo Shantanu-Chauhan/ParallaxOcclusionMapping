@@ -35,7 +35,7 @@ class Shader;
 
 struct hammer {
 	float Num = 20;
-	float hammersley[40] = { 0.0f }; // [2*N]
+	float hammersley[100] = { 0.0f }; // [2*N]
 };
 class Scene
 {
