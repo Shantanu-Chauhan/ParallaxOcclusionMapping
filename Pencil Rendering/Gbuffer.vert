@@ -14,7 +14,6 @@ in vec2 vertexTexture;
 out vec4 FragPos;
 out vec3 normalVec;
 out vec2 texCoord;
-void LightingVert(vec3 eye);
 
 void main()
 {   

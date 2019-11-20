@@ -57,21 +57,21 @@ void main()
 		New=fract(New);
 		Diffuse=texture(TEXTURE,New).xyz;
 	}
-	else if(objectId==seaId)
-	{
-		vec3 No = gNormal.xyz;
-		vec3 eyePos = (WorldInverse * vec4(0.0,0.0,0.0,1.0)).xyz;
-		vec3 V = normalize(eyePos - FragPos.xyz);
-		vec2 New=vec2(texCoord.y*500,texCoord.x*500);
-		New=fract(New);
-		vec3 delta = texture(NORMAL, New).xyz;		vec2 uv;
-		delta=delta*2.0 - vec3(1.0,1.0,1.0);		vec3 T = normalize(FragPos.xyz);		vec3 B= normalize(cross(T,No));
-		vec3 N = delta.x*T + delta.y*B + delta.z*No;
-		
-		vec3 R= vec3(- ( 2*dot(V,No)*No - V) ) ;
-		uv=vec2(1/2 - atan(R.y,R.x)/(2*3.14), acos(R.z)/3.14); 
-		Diffuse =  texture(TEXTURE, uv).xyz;
-	}
+	//else if(objectId==seaId)
+	//{
+	//	vec3 No = gNormal.xyz;
+	//	vec3 eyePos = (WorldInverse * vec4(0.0,0.0,0.0,1.0)).xyz;
+	//	vec3 V = normalize(eyePos - FragPos.xyz);
+	//	vec2 New=vec2(texCoord.y*500,texCoord.x*500);
+	//	New=fract(New);
+	//	vec3 delta = texture(NORMAL, New).xyz;	//	vec2 uv;
+	//	delta=delta*2.0 - vec3(1.0,1.0,1.0);	//	vec3 T = normalize(FragPos.xyz);	//	vec3 B= normalize(cross(T,No));
+	//	vec3 N = delta.x*T + delta.y*B + delta.z*No;
+	//	
+	//	vec3 R= vec3(- ( 2*dot(V,No)*No - V) ) ;
+	//	uv=vec2(1/2 - atan(R.y,R.x)/(2*3.14), acos(R.z)/3.14); 
+	//	Diffuse =  texture(TEXTURE, uv).xyz;
+	//}
 	else
 	Diffuse= texture(TEXTURE,texCoord).xyz + diffuse;
 	//Diffuse = diffuse;

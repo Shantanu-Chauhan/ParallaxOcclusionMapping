@@ -195,8 +195,8 @@ void Scene::InitializeScene()
 
 
 
-	exposure = 7.6f;
-	contrast = 1.7f;
+	exposure = 25.0f;
+	contrast = 2.5f;
 	KernalSize = 2;
 	Filter = BlurFiler(KernalSize);
 	shadowWidth = 1024;
@@ -320,7 +320,7 @@ void Scene::InitializeScene()
 	vec3 brickColor(134.0 / 255.0, 60.0 / 255.0, 56.0 / 255.0);
 	vec3 brassColor(0.5, 0.5, 0.5);
 	vec3 grassColor(62.0 / 255.0, 102.0 / 255.0, 38.0 / 255.0);
-	vec3 waterColor(0.3, 0.3, 1.0);
+	vec3 waterColor(0.0, 0.0, 1.0);
 
 	// Creates all the models from which the scene is composed.  Each
 	// is created with a polygon shape (possibly NULL), a
@@ -354,8 +354,8 @@ void Scene::InitializeScene()
 	Texture* seaText = new Texture("textures/Newport_Loft_Ref.hdr");
 	
 	Texture* seaNormal = new Texture("textures/ripples_normalmap.png");
-	sea->TextureId = seaText->textureId;
-	sea->NormalId = seaNormal->textureId;
+	//sea->TextureId = seaText->textureId;
+	//sea->NormalId = seaNormal->textureId;
 
 	Texture* teaPot = new Texture("textures/cracks.png");
 	teapot->TextureId = teaPot->textureId;
