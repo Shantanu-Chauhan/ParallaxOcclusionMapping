@@ -195,7 +195,7 @@ void Scene::InitializeScene()
 
 
 
-	exposure = 25.0f;
+	exposure = 4.5f;
 	contrast = 2.5f;
 	KernalSize = 2;
 	Filter = BlurFiler(KernalSize);
@@ -284,6 +284,7 @@ void Scene::InitializeScene()
 	glBindAttribLocation(GbufferProgram->programId, 0, "vertex");
 	glBindAttribLocation(GbufferProgram->programId, 1, "vertexNormal");
 	glBindAttribLocation(GbufferProgram->programId, 2, "vertexTexture");
+	glBindAttribLocation(GbufferProgram->programId, 2, "vetexTangent");
 	GbufferProgram->LinkProgram();
 
 	AmbientProgram = new ShaderProgram();
@@ -328,7 +329,7 @@ void Scene::InitializeScene()
 	// alpha.
 	Object* central = new Object(NULL, nullId);
 	Object* anim = new Object(NULL, nullId);
-	Object* room = new Object(RoomPolygons, roomId, brickColor, vec3(0.0, 0.0, 0.0), 1);
+	Object* room = new Object(RoomPolygons, roomId, brickColor, vec3(0.0, 0.0, 0.0), 0.1);
 	Object* teapot = new Object(TeapotPolygons, teapotId, brassColor, vec3(0.5, 0.5, 0.5), 5000);
 	Object* podium = new Object(BoxPolygons, boxId, vec3(woodColor), vec3(0.5, 0.5, 0.5), 10);
 	Object* sky = new Object(SpherePolygons, skyId, vec3(), vec3(), 0);
@@ -367,8 +368,10 @@ void Scene::InitializeScene()
 
 	Texture* walls = new Texture("textures/brick.png");
 	Texture* wallNormal = new Texture("textures/Standard_red_pxr128_normal.png");
+	Texture* wallHeight = new Texture("textures/bricks2_disp.png");
 	room->TextureId = walls->textureId;
 	room->NormalId = wallNormal->textureId;
+	room->HeightId = wallHeight->textureId;
 
 	Texture* grass = new Texture("textures/grass.jpg");
 	ground->TextureId = grass->textureId;
@@ -388,11 +391,13 @@ void Scene::InitializeScene()
 	// Central model has a rudimentary animation (constant rotation on Z)
 	animated.push_back(anim);
 
+
+	//TODO UNCOMMENT BELOW
 	// Central contains a teapot on a podium and an external sphere of spheres
-	central->add(podium, Translate(0.0, 0, 0));
-	central->add(anim, Translate(0.0, 0, 0));
-	anim->add(teapot, Translate(0.1, 0.0, 1.5) * TeapotPolygons->modelTr * Scale(30.0,30.0,30.0));
-	anim->add(spheres, Translate(0.0, 0.0, 0.0) * Scale(30.0, 30.0, 30.0));
+	//central->add(podium, Translate(0.0, 0, 0));
+	//central->add(anim, Translate(0.0, 0, 0));
+	//anim->add(teapot, Translate(0.1, 0.0, 1.5) * TeapotPolygons->modelTr * Scale(30.0,30.0,30.0));
+	//anim->add(spheres, Translate(0.0, 0.0, 0.0) * Scale(30.0, 30.0, 30.0));
 
 	// Room contains two framed pictures
 	room->add(leftFrame, Translate(-1.5, 9.85, 1.) * Scale(0.8, 0.8, 0.8));
@@ -564,7 +569,7 @@ void Scene::DrawScene()
 
 		CHECKERROR;
 
-		FSQ->Draw(AmbientProgram, Identity);
+		//FSQ->Draw(AmbientProgram, Identity);
 
 		CHECKERROR;
 		AmbientProgram->Unuse();

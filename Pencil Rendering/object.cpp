@@ -85,6 +85,22 @@ void Object::Draw(ShaderProgram* program, MAT4& objectTr,bool dontdraw)
 		glBindTexture(GL_TEXTURE_2D, NormalId);
 		loc = glGetUniformLocation(program->programId, "NORMAL");
 		glUniform1i(loc, 6);
+		loc = glGetUniformLocation(program->programId, "normalPresent");
+		glUniform1f(loc, 1.0f);
+	}
+	if (HeightId > 0)
+	{
+		glActiveTexture((GLenum)((int)GL_TEXTURE0 + 7));
+		glBindTexture(GL_TEXTURE_2D, NormalId);
+		loc = glGetUniformLocation(program->programId, "HEIGHT");
+		glUniform1i(loc, 6);
+		loc = glGetUniformLocation(program->programId, "heightPresent");
+		glUniform1f(loc, 1.0f);
+	}
+	else if (HeightId <= 0)
+	{
+		loc = glGetUniformLocation(program->programId, "heightPresent");
+		glUniform1f(loc, 1.0f);
 	}
     // Draw this object
     CHECKERROR;
@@ -100,6 +116,16 @@ void Object::Draw(ShaderProgram* program, MAT4& objectTr,bool dontdraw)
 	if (TextureId > 0)
 	{
 		glActiveTexture((GLenum)((int)GL_TEXTURE0 + 5));
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+	if (NormalId > 0)
+	{
+		glActiveTexture((GLenum)((int)GL_TEXTURE0 + 6));
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+	if (HeightId > 0)
+	{
+		glActiveTexture((GLenum)((int)GL_TEXTURE0 + 7));
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
     // Recursively draw each sub-objects, each with its own transformation.

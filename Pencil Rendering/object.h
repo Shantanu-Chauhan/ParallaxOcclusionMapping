@@ -42,6 +42,7 @@ class Object
     // Object::Draw.
 	unsigned int TextureId;
 	unsigned int NormalId;
+	unsigned int HeightId;
 	void Object::Draw(ShaderProgram* program, MAT4& objectTr, bool dontdraw=false);
 
     void add(Object* m, MAT4 tr=MAT4()) { instances.push_back(std::make_pair(m,tr)); }
