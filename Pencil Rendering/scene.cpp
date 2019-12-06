@@ -366,9 +366,9 @@ void Scene::InitializeScene()
 	podium->TextureId = box->textureId;
 	podium->NormalId = boxNormal->textureId;
 
-	Texture* walls = new Texture("textures/brick.png");
-	Texture* wallNormal = new Texture("textures/Standard_red_pxr128_normal.png");
-	Texture* wallHeight = new Texture("textures/bricks2_disp.png");
+	Texture* walls = new Texture("textures/brick.jpg");
+	Texture* wallNormal = new Texture("textures/Standard_red_pxr128_normal.jpg");
+	Texture* wallHeight = new Texture("textures/bricks2_disp.jpg");
 	room->TextureId = walls->textureId;
 	room->NormalId = wallNormal->textureId;
 	room->HeightId = wallHeight->textureId;

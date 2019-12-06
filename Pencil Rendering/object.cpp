@@ -85,8 +85,6 @@ void Object::Draw(ShaderProgram* program, MAT4& objectTr,bool dontdraw)
 		glBindTexture(GL_TEXTURE_2D, NormalId);
 		loc = glGetUniformLocation(program->programId, "NORMAL");
 		glUniform1i(loc, 6);
-		loc = glGetUniformLocation(program->programId, "normalPresent");
-		glUniform1f(loc, 1.0f);
 	}
 	if (HeightId > 0)
 	{
@@ -94,13 +92,6 @@ void Object::Draw(ShaderProgram* program, MAT4& objectTr,bool dontdraw)
 		glBindTexture(GL_TEXTURE_2D, NormalId);
 		loc = glGetUniformLocation(program->programId, "HEIGHT");
 		glUniform1i(loc, 6);
-		loc = glGetUniformLocation(program->programId, "heightPresent");
-		glUniform1f(loc, 1.0f);
-	}
-	else if (HeightId <= 0)
-	{
-		loc = glGetUniformLocation(program->programId, "heightPresent");
-		glUniform1f(loc, 1.0f);
 	}
     // Draw this object
     CHECKERROR;

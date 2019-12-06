@@ -29,8 +29,6 @@ uniform mat4 WorldInverse;
 uniform vec3 specular;//Ks
 in vec2 texCoord;//texcoord
 uniform float shininess;//alpha exponent
-uniform float heightPresent;
-uniform float normalPresent;
 uniform sampler2D TEXTURE;
 uniform sampler2D NORMAL;
 uniform sampler2D HEIGHT;
@@ -46,12 +44,12 @@ layout (location = 3) out vec3 Diffuse;
 vec2 ParallaxMapping(vec2 uv, vec3 V)
 {
 	float height = texture(HEIGHT, uv).r;
-	return uv - V.xy * (height * 0.1);
+	return uv - V.xy * (height * 0.3);
 }
 
 vec2 ParallaxOcclusionMapping(vec2 uv, vec3 V)
 {
-	const float minLayers = 0;
+	const float minLayers = 8;
 	const float maxLayers = 32;
 	float numLayers = mix(maxLayers, minLayers, abs(dot(vec3(0.0, 0.0, 1.0), V)));
 
@@ -90,30 +88,6 @@ void main()
 	
 	// also store the per-fragment normals into the gbuffer
 	gNormal = normalize(normalVec);
-	   
-	// Assuming if a height map is present, a normal map is also present
-	//if(heightPresent == 1.0)
-	//{
-	//	vec2 uv = texCoord;
-	//	vec3 V = viewPosition;
-	//	uv = ParallaxMapping(uv, V);
-	//	//uv = ParallaxOcclusionMapping(uv, V);
-	//	if(uv.x > 1.0 || uv.y > 1.0 || uv.x < 0.0 || uv.y < 0.0)
-	//		discard;
-	//
-	//	vec3 normal = normalize(texture(NORMAL, uv).rgb * 2.0 - vec3(1.0));
-	//	//gNormal = vec4(normal, gl_FragDepth);
-	//	gNormal = normal;
-	//}
-
-	//else if(normalPresent == 1)
-	//{
-	//	vec3 normal = texture(NORMAL, texCoord).rgb;
-	//	normal = normalize(normal * 2.0 - 1.0);
-	//	normal = normalize(TBN * normal);
-	//	//gNormal = vec4(normal.xyz, gl_FragDepth);
-	//	gNormal = normal;
-	//}
 
 	// and the diffuse per-fragment color
 	gAlbedoSpec.rgb = specular;
@@ -147,12 +121,32 @@ void main()
 		vec3 No = gNormal.xyz;
 		vec3 eyePos = (WorldInverse * vec4(0.0,0.0,0.0,1.0)).xyz;
 		vec3 V = normalize(eyePos - FragPos.xyz);
-		vec2 New=vec2(texCoord.y*30,-texCoord.x*15);
-		New=fract(New);								
-		vec3 delta = texture(NORMAL, New).xyz;				vec2 uv;
-		delta=delta*2.0 - vec3(1.0,1.0,1.0);		vec3 T = normalize(tanVec);		vec3 B= normalize(cross(T,No));
-		gNormal = delta.x*T + delta.y*B + delta.z*No;
-		Diffuse =texture(TEXTURE,New).xyz;
+
+		vec2 New=vec2(texCoord.y*25,-texCoord.x*15);
+		New=fract(New);	//UV!!!	
+		vec3 delta = texture(NORMAL, New).xyz;		
+		delta=delta*2.0 - vec3(1.0,1.0,1.0);
+		vec2 newuv;
+		float temp;
+		vec3 NewV = vec3(V.x,V.z,V.y);
+		V = -viewPosition;
+		//V = -V;
+		temp = V.y;
+		V.y = V.z;
+		V.z = temp;
+		newuv = ParallaxMapping(New, NewV);
+		//newuv = ParallaxOcclusionMapping(New, NewV);
+		//if(newuv.x > 1.0 || newuv.y > 1.0 || newuv.x < 0.0 || newuv.y < 0.0)
+		//	discard;
+		
+		delta = texture(NORMAL, newuv).xyz;		
+		delta=delta*2.0 - vec3(1.0,1.0,1.0);
+		//vec3 normal = normalize(texture(NORMAL, newuv).rgb * 2.0 - vec3(1.0));
+		//gNormal = normal;
+		gNormal = delta;
+		
+		//Diffuse =texture(TEXTURE,New).xyz;
+		Diffuse =vec3(0.5);
 	}
 	else
 	Diffuse= texture(TEXTURE,texCoord).xyz + diffuse;

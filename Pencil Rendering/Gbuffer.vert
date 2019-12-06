@@ -32,9 +32,10 @@ void main()
 	vec3 N = normalize(mat3(MV) * vertexNormal);
 	vec3 T = normalize(mat3(MV) * vertexTangent);
 	vec3 B = normalize(cross(N, T));
+	//T =mat3(ModelTr)*vertexTangent; // Proper way to transform a VECTOR
 
-	TBN = mat3(T, B, N);
-	tanVec =mat3(ModelTr)*vertexTangent; // Proper way to transform a VECTOR
+	//TBN = mat3(T, B, N);
+
 	// Get eye direction in tangent space
 	vec3 V = -P.xyz;
 	viewPosition = normalize(vec3(dot(V,T), dot(V,B), dot(V,N)));
